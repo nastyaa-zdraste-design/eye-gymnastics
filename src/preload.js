@@ -16,4 +16,6 @@ contextBridge.exposeInMainWorld('eg', {
   onHaze: on('nag:haze'),
   onReset: on('nag:reset'),
   nagIdle: () => ipcRenderer.send('nag:idle'),
+  nagHover: (over) => ipcRenderer.send('nag:hover', !!over),
+  nagClick: () => ipcRenderer.send('nag:click'),
 });

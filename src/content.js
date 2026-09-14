@@ -3,13 +3,11 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const GUIDES = new Set(['cross', 'diag', 'focus', 'dark']);
-
 function lines(text) {
   return String(text).replace(/^﻿/, '').split(/\r?\n/);
 }
 
-// [Название | секунды]  или  [Название | секунды | подсказка]
+// [Название | секунды]
 function parseExercises(text) {
   const steps = [];
   let cur = null;
@@ -23,11 +21,10 @@ function parseExercises(text) {
   };
   for (const raw of lines(text)) {
     if (raw.trimStart().startsWith('#')) continue;
-    const m = raw.match(/^\s*\[\s*(.+?)\s*\|\s*(\d+)\s*(?:\|\s*([a-z]+)\s*)?\]\s*$/i);
+    const m = raw.match(/^\s*\[\s*(.+?)\s*\|\s*(\d+)\s*\]\s*$/);
     if (m) {
       flush();
-      const guide = (m[3] || '').toLowerCase();
-      cur = { name: m[1], sec: parseInt(m[2], 10), guide: GUIDES.has(guide) ? guide : '', buf: [] };
+      cur = { name: m[1], sec: parseInt(m[2], 10), buf: [] };
       continue;
     }
     if (cur) cur.buf.push(raw.trimEnd());

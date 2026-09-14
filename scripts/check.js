@@ -7,24 +7,25 @@ const { parseExercises, parseJokes, pickJoke, jokeKey, loadContent } = require('
 const { levelInfo, dueEffects, MAX_LEVEL } = require('../src/debt');
 const { loadState, saveState } = require('../src/state');
 const { timeline } = require('../src/timeline');
+const { MouseTracker, nextWatching } = require('../src/mouse');
 
 const root = path.join(__dirname, '..');
 let n = 0;
 const ok = (name, fn) => { fn(); n++; console.log('  ok ', name); };
 
-ok('встроенные упражнения: 9 шагов, ровно 5 минут', () => {
+ok('встроенные упражнения: 8 шагов, 3:10, движения глазами 40 с', () => {
   const steps = parseExercises(fs.readFileSync(path.join(root, 'content/exercises.txt'), 'utf8'));
-  assert.strictEqual(steps.length, 9);
-  assert.strictEqual(steps.reduce((a, s) => a + s.sec, 0), 300);
-  assert.deepStrictEqual(steps.map((s) => s.guide), ['', '', 'dark', '', 'focus', 'cross', 'diag', '', '']);
+  assert.strictEqual(steps.length, 8);
+  assert.strictEqual(steps.reduce((a, s) => a + s.sec, 0), 190);
+  assert.strictEqual(steps.find((s) => s.name === 'Движения глазами').sec, 40);
   assert.ok(steps.every((s) => s.text.length > 0));
 });
 
-ok('разбор упражнений: комментарии, BOM, CRLF, неизвестная подсказка', () => {
-  const s = parseExercises('﻿# x\r\n[А | 10 | wat]\r\nстрока 1\r\n# скрыто\r\nстрока 2\r\n\r\n[Б|5]\r\nб\r\n[В | 0]\r\n');
+ok('разбор упражнений: комментарии, BOM, CRLF, пустые шаги', () => {
+  const s = parseExercises('﻿# x\r\n[А | 10]\r\nстрока 1\r\n# скрыто\r\nстрока 2\r\n\r\n[Б|5]\r\nб\r\n[В | 0]\r\n');
   assert.deepStrictEqual(s, [
-    { name: 'А', sec: 10, guide: '', text: 'строка 1\nстрока 2' },
-    { name: 'Б', sec: 5, guide: '', text: 'б' },
+    { name: 'А', sec: 10, text: 'строка 1\nстрока 2' },
+    { name: 'Б', sec: 5, text: 'б' },
   ]);
 });
 
@@ -52,7 +53,7 @@ ok('свои тексты пользователя важнее встроенн
   assert.strictEqual(c.jokes.length, 45);
 });
 
-ok('уровни долга', () => {
+ok('уровни переносов', () => {
   assert.strictEqual(levelInfo(0).snoozeMin, 0);
   assert.strictEqual(levelInfo(1).snoozeMin, 20);
   assert.strictEqual(levelInfo(99).level, MAX_LEVEL);
@@ -66,14 +67,15 @@ ok('уровни долга', () => {
 ok('состояние: пустое, битое, частичное, запись', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'eg-'));
   const f = path.join(dir, 's.json');
-  assert.strictEqual(loadState(f).settings.intervalMin, 60);
+  assert.strictEqual(loadState(f).settings.stillMin, 5);
   fs.writeFileSync(f, '{oops');
   assert.strictEqual(loadState(f).debt, 0);
-  fs.writeFileSync(f, JSON.stringify({ debt: 3, settings: { mercy: true, intervalMin: 'x' } }));
+  fs.writeFileSync(f, JSON.stringify({ debt: 3, settings: { mercy: true, intervalMin: 'x', idleResetMin: 9 } }));
   const s = loadState(f);
   assert.strictEqual(s.debt, 3);
   assert.strictEqual(s.settings.mercy, true);
   assert.strictEqual(s.settings.intervalMin, 60);
+  assert.strictEqual(s.settings.idleResetMin, undefined);
   s.debt = 4;
   assert.ok(saveState(f, s));
   assert.strictEqual(loadState(f).debt, 4);
@@ -86,6 +88,37 @@ ok('звуковая дорожка: 3-2-1 перед каждой сменой 
   assert.deepStrictEqual(at('tick'), [7, 8, 9, 12, 13, 14, 16]);
   assert.deepStrictEqual(at('step'), [10, 15]);
   assert.deepStrictEqual(at('done'), [17]);
+});
+
+ok('мышь: сразу после запуска не считается неподвижной', () => {
+  const m = new MouseTracker(1000);
+  assert.strictEqual(m.stillMs(1500), 500);
+  assert.strictEqual(nextWatching(false, { stillMs: m.stillMs(1500), activeSec: 0 }, 5 * 60 * 1000), false);
+});
+
+ok('мышь: неподвижность и активность за последние 30 секунд', () => {
+  const m = new MouseTracker(0);
+  let t = 0;
+  m.sample({ x: 0, y: 0 }, t);
+  for (let i = 1; i <= 300; i++) m.sample({ x: 1, y: 0 }, (t = i * 1000));   // дрожание в 1 px — не движение
+  assert.strictEqual(m.stillMs(t), 300 * 1000);
+  assert.strictEqual(m.activeSec(t), 0);
+  m.sample({ x: 50, y: 0 }, (t += 1000));   // одно движение, например громкость
+  assert.strictEqual(m.stillMs(t), 0);
+  assert.strictEqual(m.activeSec(t), 1);
+  for (let i = 0; i < 25; i++) m.sample({ x: 100 + i * 10, y: 0 }, (t += 1000));
+  assert.strictEqual(m.activeSec(t), 26);
+  for (let i = 0; i < 31; i++) m.sample({ x: 350, y: 0 }, (t += 1000));
+  assert.strictEqual(m.activeSec(t), 0);
+});
+
+ok('режим фильма: включается через 5 мин, короткое движение его не выключает', () => {
+  const L = 5 * 60 * 1000;
+  assert.strictEqual(nextWatching(false, { stillMs: 60000, activeSec: 0 }, L), false);
+  assert.strictEqual(nextWatching(false, { stillMs: L, activeSec: 0 }, L), true);
+  assert.strictEqual(nextWatching(true, { stillMs: 0, activeSec: 3 }, L), true);    // громкость
+  assert.strictEqual(nextWatching(true, { stillMs: 0, activeSec: 19 }, L), true);
+  assert.strictEqual(nextWatching(true, { stillMs: 0, activeSec: 20 }, L), false);  // вернулись к работе
 });
 
 console.log(`\nвсе проверки пройдены: ${n}`);

@@ -1,14 +1,19 @@
 // Донимание между перерывами. Окно прозрачно для мыши и никогда не берёт фокус.
+// Исключение — глаза и облачко: когда курсор над ними, окно принимает клик,
+// и клик запускает зарядку.
 (function () {
   'use strict';
   const eg = window.eg;
-  const cursor = { x: innerWidth / 2, y: innerHeight / 2 };
+  const cursor = { x: -1, y: -1 };
   let active = 0;
-  const live = new Set();   // всё, что сейчас на экране, для сброса
+  const live = new Set();       // всё, что сейчас на экране, для сброса
+  const clickable = new Set();  // глаза и облачка
+  let hovering = false;
 
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const rand = (a, b) => a + Math.random() * (b - a);
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
   function begin() { active++; }
   function end() {
@@ -16,7 +21,30 @@
     if (active === 0) eg.nagIdle();
   }
 
-  eg.onCursor((p) => { cursor.x = p.x; cursor.y = p.y; });
+  // Курсор над глазами или облачком — окно начинает принимать клики.
+  function updateHover() {
+    let over = false;
+    for (const el of clickable) {
+      const r = el.getBoundingClientRect();
+      if (cursor.x >= r.left - 4 && cursor.x <= r.right + 4 && cursor.y >= r.top - 4 && cursor.y <= r.bottom + 4) {
+        over = true;
+        break;
+      }
+    }
+    if (over !== hovering) { hovering = over; eg.nagHover(over); }
+  }
+
+  eg.onCursor((p) => { cursor.x = p.x; cursor.y = p.y; updateHover(); });
+
+  function makeClickable(el) {
+    clickable.add(el);
+    el.addEventListener('click', () => eg.nagClick());
+  }
+  function forget(el) {
+    clickable.delete(el);
+    el.remove();
+    updateHover();
+  }
 
   // ---------------- глаза ----------------
   const PHRASES = ['Ты там живой?', 'Моргни, если слышишь', 'Мы тут пересохли', 'Посмотри в окно. Ну пожалуйста',
@@ -38,14 +66,37 @@
     const say = document.createElement('div');
     say.className = 'say';
     say.textContent = pick(sleepy ? SLEEPY : PHRASES);
-    box.appendChild(say);
     return { box, eyes, say };
   }
 
-  async function playEyes(sleepy) {
+  // Облачко — со стороны центра экрана и всегда целиком на экране.
+  function placeSay(say, box, edge) {
+    const r = box.getBoundingClientRect();
+    const W = innerWidth, H = innerHeight;
+    const vmin = Math.min(W, H) / 100;
+    const gap = 1.6 * vmin, m = 16;
+    const bw = say.offsetWidth, bh = say.offsetHeight;
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    let x, y, tail;
+    if (edge === 'bottom') { x = cx - bw / 2; y = r.top - gap - bh; tail = 'down'; }
+    else if (edge === 'top') { x = cx - bw / 2; y = r.bottom + gap; tail = 'up'; }
+    else if (edge === 'left') { x = r.right + gap; y = cy - bh / 2; tail = 'left'; }
+    else { x = r.left - gap - bw; y = cy - bh / 2; tail = 'right'; }
+    x = clamp(x, m, W - bw - m);
+    y = clamp(y, m, H - bh - m);
+    say.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    say.className = say.className.replace(/\btail-\w+/g, '').trim() + ' tail-' + tail;
+    // хвостик смотрит на глаза, даже если облачко пришлось сдвинуть
+    const t = tail === 'down' || tail === 'up' ? clamp(cx - x, 14, bw - 14) : clamp(cy - y, 12, bh - 12);
+    say.style.setProperty('--tail', t.toFixed(1) + 'px');
+  }
+
+  const EDGES = ['bottom', 'bottom', 'left', 'right', 'top'];
+
+  async function playEyes(sleepy, forcedEdge) {
     begin();
     const e = makeEyes(sleepy);
-    const edge = pick(['bottom', 'bottom', 'left', 'right', 'top']);
+    const edge = EDGES.includes(forcedEdge) ? forcedEdge : pick(EDGES);
     const b = e.box;
     let hidden, shown;
     if (edge === 'bottom' || edge === 'top') {
@@ -59,13 +110,13 @@
       hidden = `translateX(${edge === 'right' ? 130 : -130}%)`;
       shown = `translateX(${edge === 'right' ? 18 : -18}%)`;
     }
-    // подпись — в сторону центра экрана
-    e.say.style[edge === 'bottom' ? 'bottom' : 'top'] = edge === 'bottom' ? '115%' : '115%';
-    e.say.style.left = edge === 'right' ? 'auto' : '0';
-    if (edge === 'right') e.say.style.right = '0';
     b.style.transform = hidden;
     document.body.appendChild(b);
+    document.body.appendChild(e.say);
+    makeClickable(b);
+    makeClickable(e.say);
     live.add(b);
+    live.add(e.say);
 
     const baseLid = sleepy ? 0.42 : 0;
     let lid = baseLid, lidTarget = baseLid, running = true;
@@ -77,11 +128,12 @@
         const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
         const dx = cursor.x - cx, dy = cursor.y - cy;
         const d = Math.hypot(dx, dy) || 1;
-        const m = Math.min(r.width * 0.2, d / 12);
-        eye.iris.style.transform = `translate(${(dx / d) * m}px, ${(dy / d) * m}px)`;
+        const mv = Math.min(r.width * 0.2, d / 12);
+        eye.iris.style.transform = `translate(${(dx / d) * mv}px, ${(dy / d) * mv}px)`;
         lid += (lidTarget - lid) * 0.35;
         eye.lid.style.transform = `scaleY(${lid.toFixed(3)})`;
       }
+      placeSay(e.say, b, edge);
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
@@ -112,7 +164,9 @@
     b.style.transform = hidden;
     await sleep(900);
     running = false;
-    b.remove();
+    forget(b);
+    forget(e.say);
+    live.delete(e.say);
     if (live.delete(b)) end();
   }
 
@@ -169,7 +223,7 @@
 
   // ---------------- связь ----------------
   eg.onNag((d) => {
-    if (d.kind === 'eyes') playEyes(!!d.sleepy);
+    if (d.kind === 'eyes') playEyes(!!d.sleepy, d.edge);
     else if (d.kind === 'ghosts') playGhosts(d.level || 4);
   });
   eg.onHaze((on) => document.getElementById('haze').classList.toggle('on', !!on));
@@ -178,6 +232,8 @@
     for (const item of live) if (item instanceof HTMLElement) item.remove();
     document.querySelectorAll('.ghost').forEach((g) => g.remove());
     live.clear();
+    clickable.clear();
+    hovering = false;
     active = 0;
   });
 })();

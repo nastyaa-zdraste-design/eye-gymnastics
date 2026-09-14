@@ -6,6 +6,7 @@ const fs = require('fs');
 const { loadContent, pickJoke } = require('./content');
 const { levelInfo, dueEffects } = require('./debt');
 const { loadState, saveState } = require('./state');
+const { MouseTracker, nextWatching } = require('./mouse');
 
 const ROOT = path.join(__dirname, '..');
 const BUNDLED = path.join(ROOT, 'content');
@@ -36,8 +37,9 @@ let breakWin = null;
 let covers = [];
 let current = null;          // текущий перерыв: { joke, used, finished, rest, payload }
 let nextAt = 0;              // когда следующий перерыв (мс)
-let away = false;            // человек отошёл от компьютера
-let awaySince = 0;
+const mouse = new MouseTracker();
+let watching = false;        // мышь давно не двигалась — смотрят фильм, перерыв и напоминания ждут
+let awaySince = 0;           // когда компьютер заблокировали или усыпили
 const lastFx = { eyes: 0, ghosts: 0 };
 let nagWin = null, nagReady = null, nagBusy = false, hazeOn = false, cursorTimer = null;
 
@@ -79,16 +81,21 @@ function snooze(why) {
 }
 
 // ---------------- главный цикл: раз в 5 секунд ----------------
+// Отсчёт часа идёт всегда. Пока смотрят фильм, перерыв не показывается,
+// а если время пришло — покажется, когда мышью снова начнут работать.
 function check() {
   if (breakWin) return;
-  const idleSec = powerMonitor.getSystemIdleTime();
-  if (idleSec >= state.settings.idleResetMin * 60) {
-    if (!away) { away = true; rested(`нет активности ${Math.round(idleSec / 60)} мин`); }
-    return;
-  }
-  if (away) { away = false; schedule(intervalMs(), 'вернулись к компьютеру'); return; }
   const now = Date.now();
-  if (now >= nextAt) { startBreak('по расписанию'); return; }
+  const was = watching;
+  watching = nextWatching(watching, { stillMs: mouse.stillMs(now), activeSec: mouse.activeSec(now) },
+    state.settings.stillMin * MIN);
+  if (watching !== was) {
+    log(watching ? 'мышь не двигается — похоже на фильм, перерыв и напоминания ждут' : 'мышью снова работают');
+    if (watching) hideNag();
+    refreshTray();
+  }
+  if (watching) return;
+  if (now >= nextAt) { startBreak(was ? 'вернулись к работе после просмотра' : 'по расписанию'); return; }
   updateNag(now);
 }
 
@@ -96,7 +103,7 @@ function onAwayStart() { if (!awaySince) awaySince = Date.now(); }
 function onAwayEnd() {
   const gone = awaySince ? Date.now() - awaySince : 0;
   awaySince = 0;
-  if (gone < state.settings.idleResetMin * MIN) return;
+  if (gone < state.settings.stillMin * MIN) return;
   if (current) { current.rest = true; if (breakWin) breakWin.close(); }
   else { rested(`компьютер был заблокирован ${Math.round(gone / MIN)} мин`); schedule(intervalMs(), 'после отдыха'); }
 }
@@ -212,7 +219,8 @@ async function playNag(kind, info) {
   w.showInactive();
   w.moveTop();
   startCursor();
-  w.webContents.send('nag:play', { kind, level: info.level, sleepy: info.sleepy });
+  // --edge=left|right|top|bottom — только для проверки: с какого края выглянут глаза
+  w.webContents.send('nag:play', { kind, level: info.level, sleepy: info.sleepy, edge: flagValue('edge') });
   log(`донимание: ${kind}, уровень ${info.level}`);
 }
 
@@ -236,6 +244,7 @@ function hideNag() {
   nagBusy = false;
   stopCursor();
   if (nagWin && !nagWin.isDestroyed()) {
+    nagWin.setIgnoreMouseEvents(true);
     nagWin.webContents.send('nag:reset');
     nagWin.hide();
   }
@@ -271,8 +280,16 @@ function setupIpc() {
   ipcMain.on('nag:idle', () => {
     nagBusy = false;
     stopCursor();
-    if (!hazeOn && nagWin && !nagWin.isDestroyed()) nagWin.hide();
+    if (nagWin && !nagWin.isDestroyed()) {
+      nagWin.setIgnoreMouseEvents(true);
+      if (!hazeOn) nagWin.hide();
+    }
   });
+  // Курсор над глазами: окно ловит клик. Ушёл — снова прозрачно для мыши.
+  ipcMain.on('nag:hover', (_e, over) => {
+    if (nagWin && !nagWin.isDestroyed()) nagWin.setIgnoreMouseEvents(!over);
+  });
+  ipcMain.on('nag:click', () => startBreak('клик по глазам'));
   ipcMain.on('app:log', (_e, msg) => log('окно: ' + String(msg).slice(0, 300)));
 }
 
@@ -319,9 +336,10 @@ function refreshTray() {
   if (!tray) return;
   const mins = Math.max(0, Math.ceil((nextAt - Date.now()) / MIN));
   const status = breakWin ? 'Идёт перерыв'
-    : away ? 'Вы отошли — отдыхаем'
+    : watching && mins === 0 ? 'Перерыв начнётся, когда продолжишь работать'
+    : watching ? 'Мышь не двигается — перерыв подождёт'
     : `Перерыв через ${mins} мин`;
-  const debtLine = state.debt ? `Долг глазам: ${state.debt} ${plural(state.debt, 'перенос', 'переноса', 'переносов')} подряд` : 'Долгов нет';
+  const debtLine = state.debt ? `Отложено ${state.debt} ${plural(state.debt, 'раз', 'раза', 'раз')} подряд` : 'Без переносов';
   tray.setImage(trayIcon(state.debt));
   tray.setToolTip(`Гимнастика для глаз\n${status}\n${debtLine}`);
   const s = state.settings;
@@ -347,7 +365,7 @@ function refreshTray() {
       { label: 'Сонные глаза', click: () => playNag('eyes', levelInfo(3)) },
       { label: 'Призрачные курсоры', click: () => playNag('ghosts', levelInfo(4)) },
       { label: 'Дымка вкл/выкл', click: () => setHaze(!hazeOn) },
-      { label: 'Сбросить долг', click: () => { rested('сброс вручную'); } },
+      { label: 'Сбросить счётчик переносов', click: () => { rested('сброс вручную'); } },
     ] },
     { label: 'Выход', click: () => { log('выход'); app.exit(0); } },
   ]));
@@ -415,6 +433,7 @@ if (!app.requestSingleInstanceLock()) {
     if (hasFlag('shots') && !app.isPackaged) startShots();
 
     schedule(hasFlag('now') ? 1500 : intervalMs(), 'старт');
+    setInterval(() => mouse.sample(screen.getCursorScreenPoint(), Date.now()), 1000);
     setInterval(check, hasFlag('now') ? 500 : 5000);
     setInterval(refreshTray, 20 * 1000);
   });

@@ -1,4 +1,4 @@
-// Окно перерыва: отсчёт, звук, подсказки, кнопки.
+// Окно перерыва: отсчёт, звук, кнопки.
 (async function () {
   'use strict';
   const $ = (id) => document.getElementById(id);
@@ -14,7 +14,7 @@
   const TOTAL = acc;
 
   const head = $('head'), title = $('title'), body = $('body'), cue = $('cue'), prog = $('prog'),
-    fill = $('fill'), dot = $('dot'), debtEl = $('debt'), hint = $('hint'),
+    fill = $('fill'), debtEl = $('debt'), hint = $('hint'),
     bSkip = $('bSkip'), bSnooze = $('bSnooze'), bBack = $('bBack');
 
   const t0 = performance.now();
@@ -102,9 +102,9 @@
     : `Отложить на ${next.snoozeMin} мин`;
 
   if (D.debt > 0) {
-    const w = D.debt % 10 === 1 && D.debt % 100 !== 11 ? 'перенос'
-      : [2, 3, 4].includes(D.debt % 10) && ![12, 13, 14].includes(D.debt % 100) ? 'переноса' : 'переносов';
-    debtEl.textContent = `Долг глазам: ${D.debt} ${w} подряд. Зарядка до конца его спишет.`;
+    const n = D.debt;
+    const w = [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'раза' : 'раз';
+    debtEl.textContent = `Отложено ${n} ${w} подряд. Сделай зарядку до конца — и счёт обнулится.`;
     debtEl.hidden = false;
   }
 
@@ -153,7 +153,7 @@
     }
     if (e.key === ' ') { e.preventDefault(); skip(); }
     else if (e.key === 'Escape') {
-      if (next.holdToSnooze) showHint('Долг большой — отложить можно только удержанием кнопки');
+      if (next.holdToSnooze) showHint('Отложено уже много раз — отложить можно только удержанием кнопки');
       else snooze();
     }
   });
@@ -163,8 +163,8 @@
     finished = true;
     eg.finished();
     document.body.className = 'finished';
-    head.textContent = 'Готово';
-    title.textContent = 'Ты — молодец!';
+    head.textContent = 'Готово!';
+    title.textContent = 'Ты - молодец!';
     body.textContent = D.joke || '';
     debtEl.hidden = true;
     cue.textContent = '';
@@ -177,7 +177,7 @@
     setTimeout(() => eg.close(), 60 * 1000);
   }
 
-  // ---------------- отсчёт и подсказки ----------------
+  // ---------------- отсчёт ----------------
   const C = 282.74;
   function setArc(p) {
     prog.setAttribute('stroke-dashoffset', (C * (1 - Math.max(0, Math.min(1, p)))).toFixed(2));
@@ -193,65 +193,21 @@
       lastIdx = i;
       title.textContent = S[i].name;
       body.textContent = S[i].text;
-      document.body.className = S[i].guide ? 'guide-' + S[i].guide : '';
     }
     const rem = Math.max(0, Math.ceil(TOTAL - el));
     head.textContent = `Шаг ${i + 1} из ${S.length}   ·   до конца ${Math.floor(rem / 60)}:${pad(rem % 60)}`;
   }
 
-  // Точка-подсказка: координаты -1..1 от центра экрана.
-  function guideTarget(kind, local, sec) {
-    const half = sec / 2;
-    const wave = (period) => Math.sin(2 * Math.PI * ((local % period) / period));
-    if (kind === 'cross') {
-      const v = wave(5);
-      return local < half ? { x: 0, y: v, s: 1 } : { x: v, y: 0, s: 1 };
-    }
-    if (kind === 'diag') {
-      if (local < half) {
-        const v = wave(5);
-        return local < half / 2 ? { x: v, y: v, s: 1 } : { x: v, y: -v, s: 1 };
-      }
-      const dir = local < half * 1.5 ? 1 : -1;
-      const a = dir * 2 * Math.PI * (((local - half) % 6) / 6) - Math.PI / 2;
-      return { x: Math.cos(a), y: Math.sin(a), s: 1 };
-    }
-    if (kind === 'focus') {
-      const p = (local % 6) / 6;
-      return { x: null, y: null, s: 0.4 + 1.4 * (1 - Math.cos(2 * Math.PI * p)) / 2 };
-    }
-    return null;
-  }
-
-  const pos = { x: 0, y: 0, s: 1, init: false };
   function render() {
     const el = elapsed();
     if (!finished && el < TOTAL) {
       const i = stepAt(el);
       const start = i ? ends[i - 1] : 0;
-      const local = el - start;
-      setArc(local / S[i].sec);
+      setArc((el - start) / S[i].sec);
       fill.style.width = ((el / TOTAL) * 100).toFixed(2) + '%';
-
-      const guide = S[i].guide;
-      if (!guide || guide === 'dark') {
-        const cyc = ((performance.now() - t0) / 1000) % 10;
-        const txt = guide === 'dark' ? '' : cyc < 4 ? 'вдох' : 'выдох';
-        if (cue.textContent !== txt) cue.textContent = txt;
-      }
-
-      const g = guideTarget(guide, local, S[i].sec);
-      if (g) {
-        const W = innerWidth, H = innerHeight;
-        let tx, ty;
-        if (g.x === null) { tx = W * 0.735; ty = H * 0.44; }
-        else { tx = W / 2 + g.x * W * 0.36; ty = H / 2 + g.y * H * 0.36; }
-        if (!pos.init) { pos.x = tx; pos.y = ty; pos.init = true; }
-        pos.x += (tx - pos.x) * 0.2;
-        pos.y += (ty - pos.y) * 0.2;
-        pos.s += (g.s - pos.s) * 0.2;
-        dot.style.transform = `translate(${pos.x.toFixed(1)}px, ${pos.y.toFixed(1)}px) scale(${pos.s.toFixed(3)})`;
-      }
+      const cyc = ((performance.now() - t0) / 1000) % 10;
+      const txt = cyc < 4 ? 'вдох' : 'выдох';
+      if (cue.textContent !== txt) cue.textContent = txt;
     }
     requestAnimationFrame(render);
   }

@@ -60,23 +60,6 @@ body {
 #cue { position: absolute; bottom: -5.4vw; font-size: var(--cue-size); letter-spacing: .36em;
   text-transform: uppercase; color: var(--cue); padding-left: .36em; white-space: nowrap; }
 
-/* ---- точка-подсказка для глаз ---- */
-#dot { position: fixed; left: 0; top: 0; width: 2.4vw; height: 2.4vw; margin: -1.2vw 0 0 -1.2vw;
-  border-radius: 50%; opacity: 0; transition: opacity .8s; z-index: 5; pointer-events: none;
-  background: radial-gradient(circle, #fffaf0 0 32%, var(--accent) 52%, rgba(240,182,124,0) 72%);
-  box-shadow: 0 0 3vw 1vw rgba(255,190,120,.35); will-change: transform; }
-body.guide-cross #dot, body.guide-diag #dot, body.guide-focus #dot { opacity: 1; }
-body.guide-cross #halo, body.guide-diag #halo, body.guide-focus #halo { opacity: 0; }
-body.guide-cross #txt, body.guide-diag #txt {
-  top: auto; bottom: 8vw; transform: none; max-width: 48%; opacity: .8; }
-body.guide-cross #title, body.guide-diag #title { font-size: calc(var(--title-size) * .62); }
-body.guide-cross #body, body.guide-diag #body { font-size: calc(var(--body-size) * .82); }
-
-/* ---- упражнения с закрытыми глазами: экран гаснет ---- */
-#dark { position: fixed; inset: 0; background: #070302; opacity: 0; transition: opacity 3s; pointer-events: none; z-index: 3; }
-body.guide-dark #dark { opacity: .9; }
-body.guide-dark #txt { opacity: .55; }
-
 /* ---- текст ---- */
 #txt { position: fixed; left: 6vw; top: 50%; transform: translateY(-50%); max-width: 46%;
   z-index: 4; transition: opacity .8s; }
