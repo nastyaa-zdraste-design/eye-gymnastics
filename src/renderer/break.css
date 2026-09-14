@@ -1,0 +1,109 @@
+/* ============================================================
+   ОФОРМЛЕНИЕ ОКНА ПЕРЕРЫВА — палитра «Терракота».
+   Размеры в vw/vh — всё масштабируется под любой монитор.
+   ============================================================ */
+:root {
+  --sky1: #180b09; --sky2: #331812; --sky3: #5a281c; --sky4: #8a4126; --sky5: #b4632f;
+  --veil: rgba(16,7,6,.52); --veil2: rgba(16,7,6,.82);
+  --glow: rgba(255,186,116,.50);
+  --orb1: #fff0d6; --orb3: rgba(255,168,88,.55);
+  --ripple: rgba(255,214,164,.92); --rippleGlow: rgba(255,186,116,.28);
+  --arc: rgba(255,205,152,.94); --arcbg: rgba(255,236,214,.17);
+  --ink: #fbf0e6;
+  --dim: rgba(232,196,176,.85);
+  --body: rgba(246,228,216,.95);
+  --btn: rgba(246,228,216,.9);
+  --btnLine: rgba(246,228,216,.28);
+  --bar: rgba(74,44,34,.9); --barfill: #e8a96b;
+  --cue: rgba(236,196,168,.72);
+  --accent: #f0b67c;
+
+  --title-size: 5.2vw;
+  --body-size: 2.1vw;
+  --head-size: 1.25vw;
+  --cue-size: 1.5vw;
+  --title-font: Georgia, "Constantia", "Iowan Old Style", serif;
+  --text-font: "Segoe UI", -apple-system, "SF Pro Text", system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; cursor: default; user-select: none; }
+body {
+  font-family: var(--text-font);
+  background: linear-gradient(var(--sky1) 0%, var(--sky2) 24%, var(--sky3) 50%, var(--sky4) 76%, var(--sky5) 100%);
+}
+#veil { position: fixed; left: 0; right: 0; bottom: 0; height: 46vw;
+  background: linear-gradient(transparent 0%, var(--veil) 62%, var(--veil2) 100%); }
+
+/* ---- дышащее солнце ---- */
+#halo { position: fixed; left: 73.5%; top: 44%; transform: translate(-50%, -50%);
+  width: 27vw; height: 27vw; display: grid; place-items: center; transition: opacity 1.2s; }
+#glow { position: absolute; inset: -48%; border-radius: 50%;
+  background: radial-gradient(circle, var(--glow), transparent 70%); }
+#ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+#ring circle { fill: none; stroke-width: 1.8; }
+#track { stroke: var(--arcbg); }
+#prog { stroke: var(--arc); stroke-linecap: round; }
+@keyframes ripple {
+  0%   { transform: scale(.18); opacity: 0; }
+  12%  { opacity: .92; }
+  100% { transform: scale(1.16); opacity: 0; }
+}
+.rip { position: absolute; width: 86%; height: 86%; border-radius: 50%;
+  border: .16vw solid var(--ripple);
+  box-shadow: 0 0 2.2vw var(--rippleGlow);
+  animation: ripple 10s cubic-bezier(.22,.72,.35,1) infinite; will-change: transform, opacity; }
+.rip:nth-of-type(2) { animation-delay: -3.33s; }
+.rip:nth-of-type(3) { animation-delay: -6.67s; }
+#core { position: absolute; width: 16%; height: 16%; border-radius: 50%;
+  background: radial-gradient(circle, var(--orb1), var(--orb3) 55%, transparent 78%); opacity: .5; }
+#cue { position: absolute; bottom: -5.4vw; font-size: var(--cue-size); letter-spacing: .36em;
+  text-transform: uppercase; color: var(--cue); padding-left: .36em; white-space: nowrap; }
+
+/* ---- точка-подсказка для глаз ---- */
+#dot { position: fixed; left: 0; top: 0; width: 2.4vw; height: 2.4vw; margin: -1.2vw 0 0 -1.2vw;
+  border-radius: 50%; opacity: 0; transition: opacity .8s; z-index: 5; pointer-events: none;
+  background: radial-gradient(circle, #fffaf0 0 32%, var(--accent) 52%, rgba(240,182,124,0) 72%);
+  box-shadow: 0 0 3vw 1vw rgba(255,190,120,.35); will-change: transform; }
+body.guide-cross #dot, body.guide-diag #dot, body.guide-focus #dot { opacity: 1; }
+body.guide-cross #halo, body.guide-diag #halo, body.guide-focus #halo { opacity: 0; }
+body.guide-cross #txt, body.guide-diag #txt {
+  top: auto; bottom: 8vw; transform: none; max-width: 48%; opacity: .8; }
+body.guide-cross #title, body.guide-diag #title { font-size: calc(var(--title-size) * .62); }
+body.guide-cross #body, body.guide-diag #body { font-size: calc(var(--body-size) * .82); }
+
+/* ---- упражнения с закрытыми глазами: экран гаснет ---- */
+#dark { position: fixed; inset: 0; background: #070302; opacity: 0; transition: opacity 3s; pointer-events: none; z-index: 3; }
+body.guide-dark #dark { opacity: .9; }
+body.guide-dark #txt { opacity: .55; }
+
+/* ---- текст ---- */
+#txt { position: fixed; left: 6vw; top: 50%; transform: translateY(-50%); max-width: 46%;
+  z-index: 4; transition: opacity .8s; }
+#head { font-size: var(--head-size); letter-spacing: .2em; text-transform: uppercase; color: var(--dim);
+  font-variant-numeric: tabular-nums; }
+#title { font-family: var(--title-font); font-size: var(--title-size); font-weight: 400;
+  color: var(--ink); margin: 1.2vw 0 1.4vw; line-height: 1.05; }
+#body { font-size: var(--body-size); line-height: 1.5; color: var(--body); white-space: pre-line; }
+#debt { margin-top: 2.2vw; font-size: 1.2vw; color: var(--accent); letter-spacing: .04em; }
+
+/* ---- кнопки ---- */
+#btns { position: fixed; right: 6vw; bottom: 4.2vw; display: flex; gap: 1.2vw; font-size: 1.15vw; z-index: 6; }
+#btns button { position: relative; overflow: hidden; background: rgba(20,9,7,.25); color: var(--btn);
+  font: inherit; cursor: pointer; padding: .8vw 1.6vw; border-radius: 999px;
+  border: 1px solid var(--btnLine); transition: background .15s, border-color .15s, color .15s; }
+#btns button:hover { background: rgba(255,230,210,.1); border-color: rgba(246,228,216,.6); color: var(--ink); }
+#btns button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#bBack { background: var(--accent) !important; color: #2a1510 !important; border-color: transparent !important; }
+#bSnooze .fillbar { position: absolute; inset: 0; transform-origin: left; transform: scaleX(var(--p, 0));
+  background: rgba(240,182,124,.35); pointer-events: none; }
+#bSnooze .lbl { position: relative; }
+#hint { position: fixed; right: 6vw; bottom: 8.4vw; font-size: 1vw; color: var(--accent); opacity: 0;
+  transition: opacity .3s; z-index: 6; }
+#hint.show { opacity: 1; }
+
+#bar { position: fixed; bottom: 0; left: 0; height: .35vw; width: 100%; background: var(--bar); z-index: 6; }
+#fill { height: 100%; width: 0; background: var(--barfill); }
+
+body.finished #halo { opacity: .45; }
+body.finished #body { font-size: calc(var(--body-size) * 1.05); }

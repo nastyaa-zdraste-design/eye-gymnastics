@@ -1,0 +1,39 @@
+{
+  "name": "eye-gymnastics",
+  "productName": "Гимнастика для глаз",
+  "version": "2.0.0",
+  "description": "Напоминание делать гимнастику для глаз: раз в час, поверх всех окон, со звуком и анекдотом в конце.",
+  "main": "src/main.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "check": "node scripts/check.js",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac"
+  },
+  "devDependencies": {
+    "electron": "^44.3.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "app.eyegymnastics",
+    "productName": "Гимнастика для глаз",
+    "files": [
+      "src/**",
+      "content/**",
+      "assets/**",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.healthcare-fitness"
+    }
+  }
+}

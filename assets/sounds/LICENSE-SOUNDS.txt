@@ -1,0 +1,15 @@
+Sounds / Звуки
+==============
+
+bowl-step.wav — Tibetan singing bowl 4.5", hit (trimmed, volume lowered)
+bowl-tick.wav — same recording, sped up 1.55x
+bowl-done.wav — Tibetan singing bowl 11", hit (trimmed, volume lowered)
+
+Sources (Wikimedia Commons):
+  "Tibetan Singing Bowl hit 4.5inch.flac"
+  "Tibetan Singing Bowl hit 11inch.flac"
+Author: Wikimedia Commons user "דג בלי מלח"
+License: CC BY-SA 4.0 — https://creativecommons.org/licenses/by-sa/4.0/
+
+The modified sound files in this folder are distributed under the same
+license (CC BY-SA 4.0). The rest of the application is under MIT.

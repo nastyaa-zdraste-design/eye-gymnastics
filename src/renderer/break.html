@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+<title>Гимнастика для глаз</title>
+<link rel="stylesheet" href="break.css">
+</head>
+<body>
+<div id="veil"></div>
+
+<div id="halo">
+  <div id="glow"></div>
+  <svg id="ring" viewBox="0 0 100 100">
+    <circle id="track" cx="50" cy="50" r="45"/>
+    <circle id="prog" cx="50" cy="50" r="45" transform="rotate(-90 50 50)"
+            stroke-dasharray="282.74" stroke-dashoffset="282.74"/>
+  </svg>
+  <div class="rip"></div><div class="rip"></div><div class="rip"></div>
+  <div id="core"></div>
+  <div id="cue"></div>
+</div>
+
+<div id="dark"></div>
+<div id="dot"></div>
+
+<main id="txt">
+  <div id="head"></div>
+  <h1 id="title"></h1>
+  <p id="body"></p>
+  <div id="debt" hidden></div>
+</main>
+
+<nav id="btns">
+  <button id="bSkip"></button>
+  <button id="bSnooze"><span class="fillbar"></span><span class="lbl"></span></button>
+  <button id="bBack" hidden>Вернуться к работе</button>
+</nav>
+<div id="hint"></div>
+
+<div id="bar"><div id="fill"></div></div>
+
+<script src="../timeline.js"></script>
+<script src="break.js"></script>
+</body>
+</html>
