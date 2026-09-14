@@ -427,6 +427,14 @@ if (!app.requestSingleInstanceLock()) {
     for (const ev of ['lock-screen', 'suspend']) powerMonitor.on(ev, onAwayStart);
     for (const ev of ['unlock-screen', 'resume']) powerMonitor.on(ev, onAwayEnd);
 
+    // Установленная программа при первом запуске сама включает автозапуск.
+    // Дальше галочка в трее — на усмотрение человека.
+    if (app.isPackaged && !state.autostartSet) {
+      setAutostart(true);
+      state.autostartSet = true;
+      save();
+    }
+
     const nag = parseInt(flagValue('nag'), 10);
     if (nag >= 0) { state.debt = nag; save(); lastFx.eyes = 0; lastFx.ghosts = 0; }
 
