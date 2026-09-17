@@ -24,8 +24,12 @@
       "assets/**",
       "package.json"
     ],
+    "directories": {
+      "buildResources": "build"
+    },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "build/icon.png"
     },
     "nsis": {
       "oneClick": true,
@@ -33,6 +37,7 @@
     },
     "mac": {
       "target": "dmg",
+      "icon": "build/icon.png",
       "category": "public.app-category.healthcare-fitness"
     }
   }

@@ -8,6 +8,7 @@ const { levelInfo, dueEffects } = require('./debt');
 const { loadState, saveState } = require('./state');
 const { MouseTracker, nextWatching } = require('./mouse');
 const { pickCaption, snoozedLabel } = require('./captions');
+const { irisFor, eyeBGRA } = require('./eyeIcon');
 
 const ROOT = path.join(__dirname, '..');
 const BUNDLED = path.join(ROOT, 'content');
@@ -315,23 +316,14 @@ function setAutostart(on) {
 
 // ---------------- трей ----------------
 // Значок рисуется кодом: глаз, радужка краснеет с ростом долга.
+const trayIconCache = new Map();
 function trayIcon(debt) {
-  const S = 32;
-  const buf = Buffer.alloc(S * S * 4);
-  const iris = debt >= 3 ? [0x4a, 0x55, 0xd9] : debt >= 1 ? [0x3a, 0x7d, 0xe8] : [0x6b, 0xa9, 0xe8]; // BGR
-  for (let y = 0; y < S; y++) {
-    for (let x = 0; x < S; x++) {
-      const dx = x - 15.5, dy = y - 15.5, i = (y * S + x) * 4;
-      const r = Math.hypot(dx, dy);
-      const inEye = Math.abs(dx) <= 15 && Math.abs(dy) <= 10 * (1 - (dx / 15.5) ** 2);
-      let c = null;
-      if (inEye) c = [0xe8, 0xf2, 0xfa];
-      if (inEye && r <= 7) c = iris;
-      if (r <= 3) c = [0x16, 0x10, 0x1c];
-      if (c) { buf[i] = c[0]; buf[i + 1] = c[1]; buf[i + 2] = c[2]; buf[i + 3] = 255; }
-    }
+  const iris = irisFor(debt);
+  const key = iris.join(',');
+  if (!trayIconCache.has(key)) {
+    trayIconCache.set(key, nativeImage.createFromBitmap(eyeBGRA(32, iris), { width: 32, height: 32, scaleFactor: 2 }));
   }
-  return nativeImage.createFromBitmap(buf, { width: S, height: S, scaleFactor: 2 });
+  return trayIconCache.get(key);
 }
 
 function openTextsFolder() {

@@ -9,6 +9,7 @@ const { loadState, saveState } = require('../src/state');
 const { timeline } = require('../src/timeline');
 const { MouseTracker, nextWatching } = require('../src/mouse');
 const { captionGroup, pickCaption, snoozedLabel } = require('../src/captions');
+const { IRIS, irisFor, eyeRGBA, eyeBGRA } = require('../src/eyeIcon');
 
 const root = path.join(__dirname, '..');
 let n = 0;
@@ -138,6 +139,23 @@ ok('подписи после переноса: группы, без повто�
   assert.strictEqual(snoozedLabel(5), 'Отложено 5 раз');
   assert.strictEqual(snoozedLabel(12), 'Отложено 12 раз');
   assert.strictEqual(snoozedLabel(22), 'Отложено 22 раза');
+});
+
+ok('глазик: прозрачные углы, тёмный зрачок, радужка краснеет от переносов', () => {
+  const S = 64;
+  const px = (buf, x, y) => Array.from(buf.subarray((y * S + x) * 4, (y * S + x) * 4 + 4));
+  const eye = eyeRGBA(S, IRIS.calm);
+  assert.strictEqual(eye.length, S * S * 4);
+  assert.strictEqual(px(eye, 0, 0)[3], 0);
+  assert.strictEqual(px(eye, S - 1, S - 1)[3], 0);
+  const c = px(eye, 32, 32);
+  assert.ok(c[3] === 255 && c[0] < 60 && c[1] < 60);
+  assert.deepStrictEqual(px(eye, 32, 22).slice(0, 3), IRIS.calm);
+  const bgra = eyeBGRA(S, IRIS.calm);
+  assert.deepStrictEqual(px(bgra, 32, 22).slice(0, 3), IRIS.calm.slice().reverse());
+  assert.deepStrictEqual(irisFor(0), IRIS.calm);
+  assert.deepStrictEqual(irisFor(2), IRIS.warm);
+  assert.deepStrictEqual(irisFor(7), IRIS.angry);
 });
 
 console.log(`\nвсе проверки пройдены: ${n}`);
