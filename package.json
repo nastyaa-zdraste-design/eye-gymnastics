@@ -5,17 +5,17 @@
   "description": "Напоминание делать гимнастику для глаз: раз в час, поверх всех окон, со звуком и анекдотом в конце.",
   "main": "src/main.js",
   "license": "MIT",
-  "author": "__OWNER__",
-  "homepage": "https://github.com/__OWNER__/__REPO__",
+  "author": "nastyaa-zdraste-design",
+  "homepage": "https://github.com/nastyaa-zdraste-design/eye-gymnastics",
   "repository": {
     "type": "git",
-    "url": "https://github.com/__OWNER__/__REPO__.git"
+    "url": "https://github.com/nastyaa-zdraste-design/eye-gymnastics.git"
   },
   "scripts": {
     "start": "electron .",
     "check": "node scripts/check.js",
-    "dist:win": "electron-builder --win",
-    "dist:mac": "electron-builder --mac"
+    "dist:win": "electron-builder --win --publish never",
+    "dist:mac": "electron-builder --mac --publish never"
   },
   "devDependencies": {
     "electron": "^44.3.0",
@@ -56,8 +56,8 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "__OWNER__",
-      "repo": "__REPO__",
+      "owner": "nastyaa-zdraste-design",
+      "repo": "eye-gymnastics",
       "releaseType": "draft"
     }
   },

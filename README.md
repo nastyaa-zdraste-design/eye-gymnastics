@@ -8,7 +8,7 @@
 
 ## Скачать
 
-Последняя версия — на странице [релизов](https://github.com/__OWNER__/__REPO__/releases/latest).
+Последняя версия — на странице [релизов](https://github.com/nastyaa-zdraste-design/eye-gymnastics/releases/latest).
 
 | Система | Файл |
 |---|---|
