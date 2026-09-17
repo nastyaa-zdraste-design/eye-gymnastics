@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&amp;display=swap">
+  <style>
+    body { margin: 0; background: #667A61; }
+    a { color: #F4F7F0; }
+    a:hover { color: #FFFFFF; }
+    @keyframes breathGlow {
+      0%   { transform: translate(-50%, -50%) scale(0.66); opacity: 0.45; animation-timing-function: cubic-bezier(.33, 1, .68, 1); }
+      40%  { transform: translate(-50%, -50%) scale(1.22); opacity: 1;    animation-timing-function: cubic-bezier(.645, .045, .355, 1); }
+      100% { transform: translate(-50%, -50%) scale(0.66); opacity: 0.45; }
+    }
+    @keyframes breathCore {
+      0%   { transform: translate(-50%, -50%) scale(0.55); opacity: 0.5; animation-timing-function: cubic-bezier(.33, 1, .68, 1); }
+      40%  { transform: translate(-50%, -50%) scale(1.35); opacity: 1;   animation-timing-function: cubic-bezier(.645, .045, .355, 1); }
+      100% { transform: translate(-50%, -50%) scale(0.55); opacity: 0.5; }
+    }
+    @keyframes startFill {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+    /* показ удержания: 2 с заполняется, затем пауза */
+    @keyframes hold {
+      0%, 15%   { transform: scaleX(0); }
+      65%       { transform: scaleX(1); }
+      75%       { transform: scaleX(1); opacity: 1; }
+      85%       { transform: scaleX(1); opacity: 0; }
+      86%, 100% { transform: scaleX(0); opacity: 1; }
+    }
+    .glow { animation: breathGlow 10s infinite; will-change: transform, opacity; }
+    .core { animation: breathCore 10s infinite; will-change: transform, opacity; }
+    
+    @media (prefers-reduced-motion: reduce) { .glow, .core, .hold { animation: none; } }
+  </style>
+</helmet>
+<div style="position: relative; width: 1920px; height: 1080px; overflow: hidden; background: radial-gradient(1500px 1100px at 50% 46%, #7E9278 0%, #667A61 55%, #4C5E48 100%); font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif;">
+
+  <div style="position: absolute; left: 960px; top: 470px; width: 0; height: 0;">
+    <div class="glow" style="position: absolute; left: 0; top: 0; width: 1800px; height: 1800px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle closest-side, rgba(255,246,222,0.78) 0%, rgba(255,244,218,0.72) 8%, rgba(253,240,210,0.62) 16%, rgba(250,236,202,0.50) 24%, rgba(246,232,196,0.38) 32%, rgba(242,230,190,0.27) 40%, rgba(238,228,186,0.18) 48%, rgba(234,226,182,0.11) 56%, rgba(232,226,180,0.06) 66%, rgba(232,226,180,0.025) 78%, rgba(232,226,180,0) 100%);"></div>
+    <div class="core" style="position: absolute; left: 0; top: 0; width: 640px; height: 640px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle closest-side, rgba(255,251,240,1) 0%, rgba(255,250,237,0.97) 10%, rgba(255,248,232,0.90) 20%, rgba(255,246,226,0.78) 30%, rgba(255,243,219,0.63) 40%, rgba(255,241,212,0.47) 50%, rgba(255,239,206,0.32) 60%, rgba(255,237,202,0.19) 70%, rgba(255,236,200,0.09) 80%, rgba(255,236,200,0.03) 90%, rgba(255,236,200,0) 100%);"></div>
+  </div>
+
+  <div style="position: absolute; left: 50%; top: 460px; transform: translate(-50%, -50%); width: 1280px; box-sizing: border-box; padding: 72px 90px 64px; border-radius: 48px; background: rgba(246,249,242,0.34); border: 1px solid rgba(255,255,255,0.45); box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 30px 80px rgba(30,42,28,0.22); backdrop-filter: blur(16px) saturate(110%); display: flex; flex-direction: column; align-items: center; gap: 26px; text-align: center;">
+    <div style="font-size: 30px; font-weight: 500; line-height: 1.4; color: rgba(36,50,31,0.72);">Отложено 2 раза</div>
+    <div style="font-size: 104px; font-weight: 500; line-height: 1.02; letter-spacing: -0.02em; color: #24321F; text-wrap: balance;">«Работа — не волк»</div>
+  </div>
+
+  <div style="position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); display: flex; gap: 16px;">
+    <div style="display: flex; align-items: center; padding: 17px 40px; border-radius: 999px; background: #F4F7F0; color: #3E5143; font-size: 22px; font-weight: 500;">Начать</div>
+    <div style="display: flex; align-items: center; padding: 16px 32px; border-radius: 999px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.32); backdrop-filter: blur(16px); color: #F4F7F0; font-size: 22px; font-weight: 500;">Отложить на 10 мин</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

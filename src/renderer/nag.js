@@ -54,7 +54,7 @@
   function makeEyes(sleepy) {
     const box = document.createElement('div');
     box.className = 'eyes' + (sleepy ? ' sleepy' : '');
-    box.style.setProperty('--size', sleepy ? '11vmin' : '8.5vmin');
+    box.style.setProperty('--size', sleepy ? '13vmin' : '11vmin');
     const eyes = [];
     for (let k = 0; k < 2; k++) {
       const eye = document.createElement('div');
@@ -172,7 +172,7 @@
 
   // ---------------- призрачные курсоры ----------------
   const ARROW = 'data:image/svg+xml;utf8,' + encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 24"><path d="M1 1 L1 19 L5.5 14.8 L8.6 22 L11.4 20.8 L8.4 13.8 L14.5 13.8 Z" fill="white" stroke="black" stroke-width="1.2" stroke-linejoin="round"/></svg>');
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 24"><path d="M1 1 L1 19 L5.5 14.8 L8.6 22 L11.4 20.8 L8.4 13.8 L14.5 13.8 Z" fill="rgba(246,249,242,0.92)" stroke="#3E5143" stroke-width="1.2" stroke-linejoin="round"/></svg>');
 
   async function playGhosts(level) {
     begin();

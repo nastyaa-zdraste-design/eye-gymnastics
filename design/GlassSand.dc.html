@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&amp;display=swap">
+  <style>
+    body { margin: 0; background: #E4D8C4; }
+    a { color: #6B5B4A; }
+    a:hover { color: #4B4034; }
+    @keyframes wander {
+      0%   { transform: translate(-50%, -50%) translate(-260px, -60px); }
+      50%  { transform: translate(-50%, -50%) translate(120px, 50px); }
+      100% { transform: translate(-50%, -50%) translate(280px, -40px); }
+    }
+    .light { animation: wander 45s ease-in-out infinite alternate; }
+    @media (prefers-reduced-motion: reduce) { .light { animation: none; } }
+  </style>
+</helmet>
+<div style="position: relative; width: 1920px; height: 1080px; overflow: hidden; background: linear-gradient(160deg, #EDE4D5 0%, #E2D5C0 50%, #D5C4AA 100%); font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif;">
+
+  <div class="light" style="position: absolute; left: 960px; top: 460px; width: 2000px; height: 1500px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(ellipse, rgba(255,251,243,0.95) 0%, rgba(250,242,228,0.6) 30%, rgba(240,228,208,0) 62%);"></div>
+
+  <div style="position: absolute; left: 50%; top: 440px; transform: translate(-50%, -50%); width: 1120px; box-sizing: border-box; padding: 60px 72px 56px; border-radius: 48px; background: rgba(255,252,246,0.34); border: 1px solid rgba(255,255,255,0.65); box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 30px 80px rgba(107,91,74,0.14); backdrop-filter: blur(36px) saturate(110%); display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center;">
+    <div style="font-size: 20px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: #8A7B68; font-variant-numeric: tabular-nums;">Шаг 6 из 8   ·   до конца 0:55</div>
+    <div style="font-size: 96px; font-weight: 500; line-height: 1.02; letter-spacing: -0.02em; color: #4B4034;">Движения глазами</div>
+    <div style="font-size: 33px; line-height: 1.5; color: #62554A; white-space: pre-wrap; text-wrap: balance;">Голова неподвижна, движения медленные и мягкие:
+вверх-вниз  ·  влево-вправо  ·  по диагоналям  ·  круг в одну и в другую сторону.</div>
+    <div style="margin-top: 10px; width: 100%; height: 4px; border-radius: 2px; background: rgba(75,64,52,0.12);">
+      <div style="width: 50%; height: 100%; border-radius: 2px; background: rgba(75,64,52,0.5);"></div>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); display: flex; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 17px 34px; border-radius: 999px; background: #6B5B4A; color: #F7F1E7; font-size: 22px; font-weight: 500;">
+      <span>Следующее</span>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"></path></svg>
+    </div>
+    <div style="display: flex; align-items: center; padding: 16px 32px; border-radius: 999px; background: rgba(255,252,246,0.38); border: 1px solid rgba(255,255,255,0.65); backdrop-filter: blur(20px); color: #4B4034; font-size: 22px; font-weight: 500;">Отложить на 20 мин</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

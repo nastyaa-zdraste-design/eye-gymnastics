@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&amp;display=swap">
+  <style>
+    body { margin: 0; background: #D6CFE2; }
+    a { color: #5A5070; }
+    a:hover { color: #3E3650; }
+    @keyframes turn { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+    .rays { animation: turn 120s linear infinite; }
+    @media (prefers-reduced-motion: reduce) { .rays { animation: none; } }
+  </style>
+</helmet>
+<div style="position: relative; width: 1920px; height: 1080px; overflow: hidden; background: radial-gradient(1500px 1100px at 50% 45%, #E6E1EE 0%, #D5CDE1 55%, #BFB5D0 100%); font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif;">
+
+  <div class="rays" style="position: absolute; left: 960px; top: 460px; width: 1700px; height: 1700px; transform: translate(-50%, -50%); border-radius: 50%; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.30) 0deg 3deg, rgba(255,255,255,0) 3deg 15deg); -webkit-mask-image: radial-gradient(circle, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 60%); mask-image: radial-gradient(circle, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 60%);"></div>
+  <div style="position: absolute; left: 960px; top: 460px; width: 900px; height: 900px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, rgba(252,250,254,1) 0%, rgba(238,233,245,0.85) 26%, rgba(226,219,236,0) 60%);"></div>
+
+  <div style="position: absolute; left: 50%; top: 440px; transform: translate(-50%, -50%); width: 1120px; box-sizing: border-box; padding: 60px 72px 56px; border-radius: 48px; background: rgba(255,255,255,0.28); border: 1px solid rgba(255,255,255,0.60); box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 30px 80px rgba(90,80,112,0.16); backdrop-filter: blur(38px) saturate(115%); display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center;">
+    <div style="font-size: 20px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: #7A7090; font-variant-numeric: tabular-nums;">Шаг 6 из 8   ·   до конца 0:55</div>
+    <div style="font-size: 96px; font-weight: 500; line-height: 1.02; letter-spacing: -0.02em; color: #3E3650;">Движения глазами</div>
+    <div style="font-size: 33px; line-height: 1.5; color: #574E6A; white-space: pre-wrap; text-wrap: balance;">Голова неподвижна, движения медленные и мягкие:
+вверх-вниз  ·  влево-вправо  ·  по диагоналям  ·  круг в одну и в другую сторону.</div>
+    <div style="margin-top: 10px; width: 100%; height: 4px; border-radius: 2px; background: rgba(62,54,80,0.12);">
+      <div style="width: 50%; height: 100%; border-radius: 2px; background: rgba(62,54,80,0.5);"></div>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); display: flex; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 17px 34px; border-radius: 999px; background: #5A5070; color: #F6F3FA; font-size: 22px; font-weight: 500;">
+      <span>Следующее</span>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"></path></svg>
+    </div>
+    <div style="display: flex; align-items: center; padding: 16px 32px; border-radius: 999px; background: rgba(255,255,255,0.30); border: 1px solid rgba(255,255,255,0.6); backdrop-filter: blur(20px); color: #3E3650; font-size: 22px; font-weight: 500;">Отложить на 20 мин</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

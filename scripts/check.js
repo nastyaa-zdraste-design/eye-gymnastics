@@ -8,6 +8,7 @@ const { levelInfo, dueEffects, MAX_LEVEL } = require('../src/debt');
 const { loadState, saveState } = require('../src/state');
 const { timeline } = require('../src/timeline');
 const { MouseTracker, nextWatching } = require('../src/mouse');
+const { captionGroup, pickCaption, snoozedLabel } = require('../src/captions');
 
 const root = path.join(__dirname, '..');
 let n = 0;
@@ -119,6 +120,24 @@ ok('режим фильма: включается через 5 мин, коро�
   assert.strictEqual(nextWatching(true, { stillMs: 0, activeSec: 3 }, L), true);    // громкость
   assert.strictEqual(nextWatching(true, { stillMs: 0, activeSec: 19 }, L), true);
   assert.strictEqual(nextWatching(true, { stillMs: 0, activeSec: 20 }, L), false);  // вернулись к работе
+});
+
+ok('подписи после переноса: группы, без повтора, окончания', () => {
+  assert.deepStrictEqual(captionGroup(0), []);
+  assert.strictEqual(pickCaption(0, ''), '');
+  assert.ok(captionGroup(1).includes('Работа — не волк'));
+  assert.deepStrictEqual(captionGroup(2), captionGroup(1));
+  assert.ok(captionGroup(4).includes('Глаза объявили забастовку'));
+  assert.ok(captionGroup(50).includes('Ты ослепнешь'));
+  for (let i = 0; i < 20; i++) {
+    assert.notStrictEqual(pickCaption(2, 'Работа — не волк'), 'Работа — не волк');
+    assert.notStrictEqual(pickCaption(6, 'Ты ослепнешь'), 'Ты ослепнешь');
+  }
+  assert.strictEqual(snoozedLabel(1), 'Отложено 1 раз');
+  assert.strictEqual(snoozedLabel(2), 'Отложено 2 раза');
+  assert.strictEqual(snoozedLabel(5), 'Отложено 5 раз');
+  assert.strictEqual(snoozedLabel(12), 'Отложено 12 раз');
+  assert.strictEqual(snoozedLabel(22), 'Отложено 22 раза');
 });
 
 console.log(`\nвсе проверки пройдены: ${n}`);

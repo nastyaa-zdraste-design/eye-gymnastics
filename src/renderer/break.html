@@ -6,36 +6,38 @@
 <title>Гимнастика для глаз</title>
 <link rel="stylesheet" href="break.css">
 </head>
-<body>
-<div id="veil"></div>
+<body class="mode-step">
+<div id="stage">
+  <div id="sun"><div id="pulse"><div class="glow"></div><div class="core"></div></div></div>
 
-<div id="halo">
-  <div id="glow"></div>
-  <svg id="ring" viewBox="0 0 100 100">
-    <circle id="track" cx="50" cy="50" r="45"/>
-    <circle id="prog" cx="50" cy="50" r="45" transform="rotate(-90 50 50)"
-            stroke-dasharray="282.74" stroke-dashoffset="282.74"/>
-  </svg>
-  <div class="rip"></div><div class="rip"></div><div class="rip"></div>
-  <div id="core"></div>
-  <div id="cue"></div>
+  <main id="panel">
+    <div id="intro" class="group" hidden>
+      <div id="snoozed"></div>
+      <div id="caption" class="big"></div>
+    </div>
+    <div id="step" class="group">
+      <div id="head" class="small"></div>
+      <div id="title" class="big"></div>
+      <div id="body"></div>
+    </div>
+    <div id="final" class="group" hidden>
+      <div class="small">Готово!</div>
+      <div id="joke"></div>
+    </div>
+    <div id="line"><div id="fill"></div></div>
+  </main>
+
+  <nav id="btns">
+    <button id="bStart" class="primary" hidden>Начать</button>
+    <button id="bSkip" class="primary" hidden>
+      <span>Следующее</span>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"></path></svg>
+    </button>
+    <button id="bSnooze"><span class="fillbar"></span><span class="lbl"></span></button>
+    <button id="bBack" class="primary" hidden>Вернуться к работе</button>
+  </nav>
+  <div id="hint"></div>
 </div>
-
-<main id="txt">
-  <div id="head"></div>
-  <h1 id="title"></h1>
-  <p id="body"></p>
-  <div id="debt" hidden></div>
-</main>
-
-<nav id="btns">
-  <button id="bSkip"></button>
-  <button id="bSnooze"><span class="fillbar"></span><span class="lbl"></span></button>
-  <button id="bBack" hidden>Вернуться к работе</button>
-</nav>
-<div id="hint"></div>
-
-<div id="bar"><div id="fill"></div></div>
 
 <script src="../timeline.js"></script>
 <script src="break.js"></script>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&amp;display=swap">
+  <style>
+    body { margin: 0; background: #14161D; }
+    a { color: #FFD2A6; }
+    a:hover { color: #FFE6CC; }
+    @keyframes ripple {
+      0%   { transform: scale(.2); opacity: 0; }
+      14%  { opacity: .9; }
+      100% { transform: scale(1.18); opacity: 0; }
+    }
+    @keyframes drift {
+      0%, 100% { transform: translate(0, 0); }
+      50%      { transform: translate(40px, -30px); }
+    }
+    .rip { animation: ripple 10s cubic-bezier(.22,.72,.35,1) infinite; }
+    .blob { animation: drift 24s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) { .rip, .blob { animation: none; } }
+  </style>
+</helmet>
+<div style="position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #14161D; font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif;">
+
+  <div class="blob" style="position: absolute; left: 1020px; top: 60px; width: 820px; height: 820px; border-radius: 50%; background: #B4632F; opacity: 0.62; filter: blur(140px);"></div>
+  <div class="blob" style="position: absolute; left: -120px; top: 520px; width: 900px; height: 760px; border-radius: 50%; background: #6B3F6E; opacity: 0.55; filter: blur(150px); animation-delay: -8s;"></div>
+  <div class="blob" style="position: absolute; left: 560px; top: -260px; width: 700px; height: 620px; border-radius: 50%; background: #1F5E6B; opacity: 0.45; filter: blur(140px); animation-delay: -16s;"></div>
+
+  <div style="position: absolute; left: 1152px; top: 216px; width: 518px; height: 518px; display: grid; place-items: center;">
+    <svg viewBox="0 0 100 100" style="position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;">
+      <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="1.2"></circle>
+      <circle cx="50" cy="50" r="45" fill="none" stroke="#FFE3C6" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="282.74" stroke-dashoffset="141.37" transform="rotate(-90 50 50)"></circle>
+    </svg>
+    <div class="rip" style="position: absolute; width: 86%; height: 86%; border-radius: 50%; border: 2px solid rgba(255,244,232,0.75); backdrop-filter: blur(6px); transform: scale(0.45); opacity: 0.8;"></div>
+    <div class="rip" style="position: absolute; width: 86%; height: 86%; border-radius: 50%; border: 2px solid rgba(255,244,232,0.75); transform: scale(0.72); opacity: 0.5; animation-delay: -3.33s;"></div>
+    <div class="rip" style="position: absolute; width: 86%; height: 86%; border-radius: 50%; border: 2px solid rgba(255,244,232,0.75); transform: scale(0.98); opacity: 0.22; animation-delay: -6.67s;"></div>
+    <div style="position: absolute; width: 22%; height: 22%; border-radius: 50%; background: radial-gradient(circle at 40% 38%, #FFFFFF 0%, #FFE6CC 40%, rgba(255,196,140,0.55) 72%, rgba(255,196,140,0) 100%); box-shadow: 0 0 80px rgba(255,210,166,0.55);"></div>
+  </div>
+
+  <div style="position: absolute; left: 88px; top: 50%; transform: translateY(-50%); width: 900px; padding: 64px 64px 68px; box-sizing: border-box; border-radius: 44px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.16); box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 40px 120px rgba(0,0,0,0.30); backdrop-filter: blur(40px) saturate(140%); display: flex; flex-direction: column; gap: 26px;">
+    <div style="font-size: 22px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(246,238,232,0.62); font-variant-numeric: tabular-nums;">Шаг 6 из 8   ·   до конца 0:55</div>
+    <div style="font-size: 100px; font-weight: 500; line-height: 1.02; letter-spacing: -0.02em; color: #F9F3EE; text-wrap: balance;">Движения глазами</div>
+    <div style="font-size: 36px; font-weight: 400; line-height: 1.5; color: rgba(246,238,232,0.84); white-space: pre-wrap; text-wrap: pretty;">Голова неподвижна, движения медленные и мягкие:
+вверх-вниз  ·  влево-вправо  ·  по диагоналям  ·  круг в одну и в другую сторону.</div>
+  </div>
+
+  <div style="position: absolute; right: 115px; bottom: 88px; display: flex; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 17px 34px; border-radius: 999px; background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.26); box-shadow: inset 0 1px 0 rgba(255,255,255,0.28); backdrop-filter: blur(24px); color: #FFFFFF; font-size: 22px; font-weight: 500;">
+      <span>Следующее</span>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"></path></svg>
+    </div>
+    <div style="display: flex; align-items: center; padding: 16px 32px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); backdrop-filter: blur(24px); color: rgba(255,255,255,0.86); font-size: 22px; font-weight: 500;">Отложить на 20 мин</div>
+  </div>
+
+  <div style="position: absolute; left: 0; bottom: 0; width: 100%; height: 7px; background: rgba(255,255,255,0.08);">
+    <div style="width: 71%; height: 100%; background: linear-gradient(90deg, rgba(255,210,166,0.7), #FFD2A6);"></div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&amp;display=swap">
+  <style>
+    body { margin: 0; background: #C9D6C3; }
+    a { color: #3E5143; }
+    a:hover { color: #2F3D33; }
+    /* Дыхание: вдох 4 с, выдох 6 с. Всплеск при смене — на внешнем слое,
+       поэтому не спорит с дыханием. Смена для показа — раз в 5 с (41–46 % и 91–96 %). */
+    @keyframes breathGlow {
+      0%   { transform: translate(-50%, -50%) scale(0.66); opacity: 0.4; animation-timing-function: cubic-bezier(.33, 1, .68, 1); }
+      40%  { transform: translate(-50%, -50%) scale(1.22); opacity: 1;   animation-timing-function: cubic-bezier(.645, .045, .355, 1); }
+      100% { transform: translate(-50%, -50%) scale(0.66); opacity: 0.4; }
+    }
+    @keyframes breathCore {
+      0%   { transform: translate(-50%, -50%) scale(0.55); opacity: 0.45; animation-timing-function: cubic-bezier(.33, 1, .68, 1); }
+      40%  { transform: translate(-50%, -50%) scale(1.35); opacity: 1;    animation-timing-function: cubic-bezier(.645, .045, .355, 1); }
+      100% { transform: translate(-50%, -50%) scale(0.55); opacity: 0.45; }
+    }
+    @keyframes changePulse {
+      0%, 42%   { transform: scale(1); }
+      46%       { transform: scale(1.14); animation-timing-function: cubic-bezier(.645, .045, .355, 1); }
+      56%, 92%  { transform: scale(1); }
+      96%       { transform: scale(1.14); animation-timing-function: cubic-bezier(.645, .045, .355, 1); }
+      100%      { transform: scale(1.03); }
+    }
+    @keyframes layerA {
+      0%     { opacity: 1; transform: translateY(0); }
+      41%    { opacity: 1; transform: translateY(0); animation-timing-function: cubic-bezier(.32, 0, .67, 0); }
+      43%    { opacity: 0; transform: translateY(-12px); }
+      43.1%  { opacity: 0; transform: translateY(16px); }
+      93%    { opacity: 0; transform: translateY(16px); animation-timing-function: cubic-bezier(.23, 1, .32, 1); }
+      96%    { opacity: 1; transform: translateY(0); }
+      100%   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes layerB {
+      0%     { opacity: 0; transform: translateY(16px); }
+      43%    { opacity: 0; transform: translateY(16px); animation-timing-function: cubic-bezier(.23, 1, .32, 1); }
+      46%    { opacity: 1; transform: translateY(0); }
+      91%    { opacity: 1; transform: translateY(0); animation-timing-function: cubic-bezier(.32, 0, .67, 0); }
+      93%    { opacity: 0; transform: translateY(-12px); }
+      93.1%  { opacity: 0; transform: translateY(16px); }
+      100%   { opacity: 0; transform: translateY(16px); }
+    }
+    @keyframes fill {
+      0%     { transform: scaleX(0.5); }
+      41%    { transform: scaleX(1); }
+      43%    { transform: scaleX(1); opacity: 1; }
+      44%    { transform: scaleX(0); opacity: 0; }
+      46%    { transform: scaleX(0); opacity: 1; }
+      91%    { transform: scaleX(0.9); }
+      93%    { transform: scaleX(0.9); opacity: 1; }
+      94%    { transform: scaleX(0.5); opacity: 0; }
+      96%    { transform: scaleX(0.5); opacity: 1; }
+      100%   { transform: scaleX(0.5); }
+    }
+    .glow  { animation: breathGlow 10s infinite; will-change: transform, opacity; }
+    .core  { animation: breathCore 10s infinite; will-change: transform, opacity; }
+    .pulse { animation: changePulse 10s infinite; will-change: transform; }
+    .a  { animation: layerA 10s infinite; }
+    .b  { animation: layerB 10s infinite; }
+    .d1 { animation-delay: 60ms; }
+    .d2 { animation-delay: 120ms; }
+    .fill { transform-origin: 0 50%; animation: fill 10s linear infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .glow, .core, .pulse, .a, .b, .fill { animation: none; }
+      .b { opacity: 0; }
+    }
+  </style>
+</helmet>
+<div style="position: relative; width: 1920px; height: 1080px; overflow: hidden; background: radial-gradient(1500px 1100px at 50% 46%, #E2EADC 0%, #C8D6C1 55%, #A9BDA1 100%); font-family: 'Golos Text', 'Segoe UI', system-ui, sans-serif;">
+
+  <div class="pulse" style="position: absolute; left: 960px; top: 470px; width: 0; height: 0;">
+    <div class="glow" style="position: absolute; left: 0; top: 0; width: 1700px; height: 1700px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, rgba(252,253,249,1) 0%, rgba(238,244,232,0.9) 22%, rgba(220,231,212,0.45) 44%, rgba(220,231,212,0) 66%);"></div>
+    <div class="core" style="position: absolute; left: 0; top: 0; width: 520px; height: 520px; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, #FFFFFF 0%, rgba(250,252,246,0.98) 40%, rgba(236,243,230,0) 72%);"></div>
+  </div>
+
+  <div style="position: absolute; left: 50%; top: 440px; transform: translate(-50%, -50%); width: 1120px; box-sizing: border-box; padding: 60px 72px 56px; border-radius: 48px; background: rgba(255,255,255,0.28); border: 1px solid rgba(255,255,255,0.60); box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 30px 80px rgba(62,81,67,0.16); backdrop-filter: blur(30px) saturate(115%); display: flex; flex-direction: column; align-items: center; gap: 32px; text-align: center;">
+    <div style="display: grid; width: 100%;">
+      <div style="grid-area: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;">
+        <div class="a" style="font-size: 20px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: #5E6F61; font-variant-numeric: tabular-nums;">Шаг 6 из 8   ·   до конца 0:55</div>
+        <div class="a d1" style="font-size: 96px; font-weight: 500; line-height: 1.02; letter-spacing: -0.02em; color: #2F3D33;">Движения глазами</div>
+        <div class="a d2" style="font-size: 33px; line-height: 1.5; color: #43534A; white-space: pre-wrap; text-wrap: balance;">Голова неподвижна, движения медленные и мягкие:
+вверх-вниз  ·  влево-вправо  ·  по диагоналям  ·  круг в одну и в другую сторону.</div>
+      </div>
+      <div style="grid-area: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;">
+        <div class="b" style="opacity: 0; font-size: 20px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: #5E6F61; font-variant-numeric: tabular-nums;">Шаг 7 из 8   ·   до конца 0:35</div>
+        <div class="b d1" style="opacity: 0; font-size: 96px; font-weight: 500; line-height: 1.02; letter-spacing: -0.02em; color: #2F3D33;">Снятие напряжения</div>
+        <div class="b d2" style="opacity: 0; font-size: 33px; line-height: 1.5; color: #43534A; white-space: pre-wrap; text-wrap: balance;">Зажмурься на 2 секунды и широко открой глаза.</div>
+      </div>
+    </div>
+    <div style="width: 100%; height: 4px; border-radius: 2px; background: rgba(47,61,51,0.12); overflow: hidden;">
+      <div class="fill" style="width: 100%; height: 100%; border-radius: 2px; background: rgba(47,61,51,0.55); transform: scaleX(0.5); transform-origin: 0 50%;"></div>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); display: flex; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 17px 34px; border-radius: 999px; background: #3E5143; color: #F2F5EE; font-size: 22px; font-weight: 500;">
+      <span>Следующее</span>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"></path></svg>
+    </div>
+    <div style="display: flex; align-items: center; padding: 16px 32px; border-radius: 999px; background: rgba(255,255,255,0.32); border: 1px solid rgba(255,255,255,0.6); backdrop-filter: blur(20px); color: #2F3D33; font-size: 22px; font-weight: 500;">Отложить на 20 мин</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

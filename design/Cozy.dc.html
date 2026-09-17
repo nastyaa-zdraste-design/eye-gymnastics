@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=Istok+Web:wght@400;700&amp;display=swap">
+  <style>
+    body { margin: 0; background: #F3EBDD; }
+    a { color: #2E3561; }
+    a:hover { color: #5A62A0; }
+  </style>
+</helmet>
+<div style="position: relative; width: 1920px; height: 1080px; overflow: hidden; background: radial-gradient(1700px 1100px at 45% 45%, #F7F0E4 0%, #F3EBDD 60%, #E8DCC8 100%); font-family: 'Istok Web', 'Segoe UI', system-ui, sans-serif; color: #2E3561;">
+
+  <svg viewBox="0 0 1920 1080" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.10; mix-blend-mode: multiply;">
+    <filter id="paper"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch"></feTurbulence><feColorMatrix type="saturate" values="0"></feColorMatrix></filter>
+    <rect width="1920" height="1080" filter="url(#paper)"></rect>
+  </svg>
+
+  <svg viewBox="0 0 700 560" style="position: absolute; left: 1100px; top: 150px; width: 700px; height: 560px; overflow: visible; transform: rotate(-5deg);">
+    <defs>
+      <filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="4"></feTurbulence><feDisplacementMap in="SourceGraphic" scale="38"></feDisplacementMap></filter>
+      <filter id="pencil"><feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="1" seed="9"></feTurbulence><feDisplacementMap in="SourceGraphic" scale="5"></feDisplacementMap></filter>
+    </defs>
+    <path d="M120 250 C120 120 300 60 420 90 C570 125 640 230 610 350 C580 470 430 520 290 490 C150 460 120 380 120 250 Z" fill="#E2A93B" opacity="0.38" filter="url(#wobble)"></path>
+    <path d="M150 360 C160 300 230 270 300 280" fill="none" stroke="#8DAA7E" stroke-width="40" stroke-linecap="round" opacity="0.28" filter="url(#wobble)"></path>
+    <g filter="url(#pencil)" fill="none" stroke="#2E3561" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M130 280 Q350 110 570 280 Q350 450 130 280 Z" fill="#FFFBF3" stroke-width="7"></path>
+      <path d="M140 286 Q350 126 562 274" stroke-width="3" opacity="0.5"></path>
+      <path d="M190 212 L166 170 M250 180 L236 134 M320 165 L316 118 M390 165 L400 118 M455 180 L474 136 M512 212 L540 172" stroke-width="6"></path>
+      <circle cx="350" cy="280" r="74" fill="#8DAA7E" stroke-width="6"></circle>
+      <circle cx="350" cy="280" r="30" fill="#2E3561" stroke-width="4"></circle>
+      <circle cx="366" cy="264" r="9" fill="#FFFBF3" stroke="none"></circle>
+    </g>
+    <g filter="url(#pencil)" fill="none" stroke="#E59A8C" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M350 92 C345 60 352 38 350 16 M328 38 L350 14 L372 40"></path>
+      <path d="M350 470 C355 500 348 522 350 544 M328 520 L350 546 L372 518"></path>
+      <path d="M100 280 C70 276 50 284 22 280 M46 258 L20 280 L46 302"></path>
+      <path d="M600 280 C630 284 650 276 678 280 M654 258 L680 280 L654 302"></path>
+    </g>
+  </svg>
+
+  <div style="position: absolute; left: 115px; top: 150px; width: 960px; display: flex; flex-direction: column; gap: 10px;">
+    <div style="font-family: 'Caveat', cursive; font-size: 44px; font-weight: 600; color: rgba(46,53,97,0.62); font-variant-numeric: tabular-nums;">Шаг 6 из 8   ·   до конца 0:55</div>
+    <div style="position: relative; font-family: 'Caveat', cursive; font-size: 168px; font-weight: 700; line-height: 0.95; color: #2E3561;">Движения глазами</div>
+    <svg width="620" height="34" viewBox="0 0 620 34" style="margin-top: -6px;"><path d="M6 22 C120 8 240 30 360 16 C450 6 540 24 614 12" fill="none" stroke="#E59A8C" stroke-width="7" stroke-linecap="round"></path></svg>
+    <div style="margin-top: 26px; width: 880px; font-size: 36px; line-height: 1.55; color: rgba(46,53,97,0.86); white-space: pre-wrap; text-wrap: pretty;">Голова неподвижна, движения медленные и мягкие:
+вверх-вниз  ·  влево-вправо  ·  по диагоналям  ·  круг в одну и в другую сторону.</div>
+  </div>
+
+  <div style="position: absolute; right: 115px; bottom: 132px; display: flex; gap: 18px;">
+    <div style="display: flex; align-items: center; gap: 12px; padding: 16px 34px; border-radius: 255px 18px 225px 18px / 18px 225px 18px 255px; background: #E2A93B; border: 3px solid #2E3561; color: #2E3561; font-size: 24px; font-weight: 700; transform: rotate(-1.5deg);">
+      <span>Следующее</span>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11 5l5 5-5 5"></path></svg>
+    </div>
+    <div style="display: flex; align-items: center; padding: 16px 32px; border-radius: 18px 225px 18px 255px / 255px 18px 225px 18px; border: 3px solid #2E3561; color: #2E3561; font-size: 24px; font-weight: 400; transform: rotate(1deg);">Отложить на 20 мин</div>
+  </div>
+
+  <svg viewBox="0 0 1690 30" style="position: absolute; left: 115px; bottom: 56px; width: 1690px; height: 30px;">
+    <path d="M4 16 C300 10 600 22 900 14 C1100 9 1300 20 1686 14" fill="none" stroke="rgba(46,53,97,0.25)" stroke-width="4" stroke-linecap="round" stroke-dasharray="14 12"></path>
+    <path d="M4 16 C300 10 600 22 900 14 C1000 11.5 1100 12 1200 13.5" fill="none" stroke="#2E3561" stroke-width="6" stroke-linecap="round"></path>
+    <path d="M1200 13.5 l-6 -14 l14 8 z" fill="#E2A93B" stroke="#2E3561" stroke-width="2.5" stroke-linejoin="round"></path>
+  </svg>
+</div>
+</x-dc>
+</body>
+</html>

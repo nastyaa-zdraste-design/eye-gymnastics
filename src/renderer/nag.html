@@ -5,32 +5,39 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
 <title>напоминание</title>
 <style>
+  @font-face {
+    font-family: 'Golos Text';
+    src: url('../../assets/fonts/GolosText-wght.ttf') format('truetype');
+    font-weight: 400 900;
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: transparent; }
-  body { font-family: "Segoe UI", -apple-system, system-ui, sans-serif; }
+  body { font-family: 'Golos Text', 'Segoe UI', -apple-system, system-ui, sans-serif; }
 
-  /* ---- глаза: по клику начинается зарядка ---- */
-  .eyes { position: absolute; display: flex; gap: 1.2vmin; align-items: center; cursor: pointer;
-          transition: transform .8s cubic-bezier(.3,1.4,.5,1); filter: drop-shadow(0 .8vmin 1.6vmin rgba(0,0,0,.35)); }
+  /* ---- мягкие объёмные глаза в тонах Шалфея; по клику начинается зарядка ---- */
+  .eyes { position: absolute; display: flex; gap: 0.9vmin; align-items: center; cursor: pointer;
+          transition: transform .8s cubic-bezier(.3,1.4,.5,1); }
   .eye { position: relative; width: var(--size); height: var(--size); border-radius: 50%; overflow: hidden;
-         background: radial-gradient(circle at 50% 45%, #fffdf8 58%, #f2e4d6 100%);
-         box-shadow: inset 0 0 0 .55vmin #2a1712; }
-  .sleepy .eye { background: radial-gradient(circle at 50% 45%, #fff6f0 42%, #f6c8bd 78%, #ec9f93 100%); }
-  .iris { position: absolute; width: 46%; height: 46%; left: 27%; top: 27%; border-radius: 50%;
-          background: radial-gradient(circle at 42% 40%, #d19559, #7a4424 72%); }
-  .pupil { position: absolute; inset: 26%; border-radius: 50%; background: #140b08; }
-  .pupil::after { content: ''; position: absolute; width: 34%; height: 34%; left: 16%; top: 14%;
-                  border-radius: 50%; background: rgba(255,255,255,.85); }
-  .lid { position: absolute; left: -6%; right: -6%; top: -6%; height: 112%; transform-origin: 50% 0;
-         transform: scaleY(0); background: linear-gradient(#e2a27a, #d38c63);
-         box-shadow: inset 0 -.55vmin 0 #2a1712; }
+         background: radial-gradient(circle at 45% 35%, #FFFFFF 0%, #FBF8EF 45%, #E9E2D0 80%, #D8CFBA 100%);
+         box-shadow: 0 1.1vmin 2.4vmin rgba(30,42,28,0.30), inset 0 -1.1vmin 1.9vmin rgba(120,110,80,0.20); }
+  .iris { position: absolute; width: 54%; height: 54%; left: 16%; top: 20%; border-radius: 50%;
+          background: radial-gradient(circle at 45% 40%, #BFD0A8 0%, #7E9A6B 48%, #4E6A45 84%);
+          box-shadow: inset 0 0 0 0.28vmin rgba(40,55,35,0.30); }
+  .iris::after { content: ''; position: absolute; width: 13%; height: 13%; left: 62%; top: 60%;
+                 border-radius: 50%; background: rgba(255,255,255,0.8); }
+  .pupil { position: absolute; inset: 28%; border-radius: 50%; background: #1B2618; }
+  .lid { position: absolute; left: -8%; right: -8%; top: -8%; height: 116%; transform-origin: 50% 0;
+         transform: scaleY(0); background: linear-gradient(#BCCDB3, #94AA89);
+         border-radius: 0 0 50% 50% / 0 0 16% 16%; box-shadow: 0 0.74vmin 1.1vmin rgba(30,42,28,0.25); }
 
-  /* ---- облачко с подписью: отдельно от глаз, всегда целиком на экране ---- */
-  .say { position: absolute; left: 0; top: 0; white-space: nowrap; font-size: 1.9vmin; color: #2a1712;
-         background: #fff4e8; padding: .7vmin 1.4vmin; border-radius: 1.6vmin; cursor: pointer;
-         box-shadow: 0 .4vmin 1.4vmin rgba(0,0,0,.25); opacity: 0; transition: opacity .4s; }
+  /* ---- облачко из матового стекла: отдельно от глаз, всегда целиком на экране ---- */
+  .say { position: absolute; left: 0; top: 0; white-space: nowrap; font-size: 1.95vmin; font-weight: 500;
+         color: #24321F; background: rgba(246,249,242,0.82); border: 1px solid rgba(255,255,255,0.75);
+         padding: 0.8vmin 1.7vmin; border-radius: 1.7vmin; cursor: pointer;
+         backdrop-filter: blur(14px); box-shadow: 0 0.74vmin 2.2vmin rgba(30,42,28,0.18);
+         opacity: 0; transition: opacity .4s; }
   .say.show { opacity: 1; }
-  .say::after { content: ''; position: absolute; width: 1.2vmin; height: 1.2vmin; background: #fff4e8;
+  .say::after { content: ''; position: absolute; width: 1.3vmin; height: 1.3vmin; background: #F3F6EF;
                 transform: translate(-50%, -50%) rotate(45deg); }
   .say.tail-down::after  { left: var(--tail, 50%); top: 100%; }
   .say.tail-up::after    { left: var(--tail, 50%); top: 0; }
@@ -42,11 +49,17 @@
            transition: opacity .6s; will-change: transform; filter: blur(.4px); }
   .ghost.show { opacity: var(--o, .55); }
 
-  /* ---- дымка уставшего зрения ---- */
-  #haze { position: absolute; inset: 0; opacity: 0; transition: opacity 2s; pointer-events: none;
-          background: radial-gradient(ellipse at center, transparent 48%, rgba(40,16,10,.28) 78%, rgba(30,10,6,.55) 100%); }
+  /* ---- дымка уставшего зрения; сила — --h1 и --h2 ---- */
+  #haze { --h1: 0.40; --h2: 0.72;
+          position: absolute; inset: 0; opacity: 0; transition: opacity 2s; pointer-events: none;
+          background: radial-gradient(ellipse at center, rgba(40,56,38,0) 48%, rgba(40,56,38,var(--h1)) 78%, rgba(30,44,28,var(--h2)) 100%); }
   #haze.on { opacity: 1; animation: haze 7s ease-in-out infinite; }
   @keyframes haze { 0%,100% { opacity: .75; } 50% { opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .eyes { transition: none; }
+    #haze.on { animation: none; }
+  }
 </style>
 </head>
 <body>

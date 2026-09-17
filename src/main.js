@@ -7,6 +7,7 @@ const { loadContent, pickJoke } = require('./content');
 const { levelInfo, dueEffects } = require('./debt');
 const { loadState, saveState } = require('./state');
 const { MouseTracker, nextWatching } = require('./mouse');
+const { pickCaption, snoozedLabel } = require('./captions');
 
 const ROOT = path.join(__dirname, '..');
 const BUNDLED = path.join(ROOT, 'content');
@@ -42,6 +43,7 @@ let watching = false;        // мышь давно не двигалась — 
 let awaySince = 0;           // когда компьютер заблокировали или усыпили
 const lastFx = { eyes: 0, ghosts: 0 };
 let nagWin = null, nagReady = null, nagBusy = false, hazeOn = false, cursorTimer = null;
+let shootNow = null;         // отладка: сделать снимок окон прямо сейчас
 
 // ---------------- журнал и состояние ----------------
 function log(msg) {
@@ -116,11 +118,18 @@ function startBreak(reason) {
   let steps = content.steps;
   if (hasFlag('short')) steps = steps.map((s) => ({ ...s, sec: Math.min(s.sec, 6) }));
   const pick = pickJoke(content.jokes, state.jokesUsed);
+  // После переноса перерыв начинается с экрана со смешной подписью.
+  // --caption="…" — только для проверки конкретной подписи
+  const forced = app.isPackaged ? null : flagValue('caption');
+  const caption = state.debt > 0 ? (forced || pickCaption(state.debt, state.lastCaption)) : '';
+  if (caption) { state.lastCaption = caption; save(); }
   current = {
     joke: pick.joke, used: pick.used, finished: false, rest: false,
     payload: {
       steps, joke: pick.joke,
       debt: state.debt,
+      caption,
+      snoozedLabel: state.debt > 0 ? snoozedLabel(state.debt) : '',
       next: levelInfo(state.debt + 1),
       sound: state.settings.sound,
       volume: state.settings.volume,
@@ -133,7 +142,7 @@ function startBreak(reason) {
     ...display.bounds,
     frame: false, show: false, alwaysOnTop: true, skipTaskbar: true,
     resizable: false, movable: false, minimizable: false, maximizable: false, fullscreenable: false,
-    backgroundColor: '#180b09', title: 'Гимнастика для глаз',
+    backgroundColor: '#667A61', title: 'Гимнастика для глаз',
     webPreferences: { preload: PRELOAD, backgroundThrottling: false },
   });
   breakWin.setAlwaysOnTop(true, 'screen-saver');
@@ -144,6 +153,7 @@ function startBreak(reason) {
     if (!breakWin) return;
     breakWin.show();
     breakWin.focus();
+    if (shootNow) setTimeout(shootNow, 1500);   // только в режиме снимков
   });
   breakWin.on('blur', () => { if (breakWin) breakWin.moveTop(); });
   breakWin.on('closed', onBreakClosed);
@@ -158,7 +168,7 @@ function coverOtherDisplays(main) {
     if (d.id === main.id) continue;
     const w = new BrowserWindow({
       ...d.bounds, frame: false, focusable: false, alwaysOnTop: true, skipTaskbar: true,
-      resizable: false, movable: false, hasShadow: false, backgroundColor: '#0d0605', show: true,
+      resizable: false, movable: false, hasShadow: false, backgroundColor: '#4C5E48', show: true,
     });
     w.setAlwaysOnTop(true, 'screen-saver');
     covers.push(w);
@@ -376,7 +386,7 @@ function startShots() {
   const dir = path.join(userDir, 'shots');
   fs.mkdirSync(dir, { recursive: true });
   let n = 0;
-  setInterval(async () => {
+  const shoot = async () => {
     for (const [name, w] of [['break', breakWin], ['nag', nagWin]]) {
       if (!w || w.isDestroyed() || !w.isVisible()) continue;
       try {
@@ -386,7 +396,9 @@ function startShots() {
         log('снимок: ' + f);
       } catch (e) { log('снимок не удался: ' + e.message); }
     }
-  }, 7000);
+  };
+  shootNow = shoot;
+  setInterval(shoot, 7000);
 }
 
 function plural(n, one, few, many) {
