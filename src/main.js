@@ -1,6 +1,6 @@
 'use strict';
 // Гимнастика для глаз — основной процесс: трей, расписание, окна.
-const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, powerMonitor, shell } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, powerMonitor, shell, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { loadContent, pickJoke } = require('./content');
@@ -9,6 +9,8 @@ const { loadState, saveState } = require('./state');
 const { MouseTracker, nextWatching } = require('./mouse');
 const { pickCaption, snoozedLabel } = require('./captions');
 const { irisFor, eyeBGRA } = require('./eyeIcon');
+const { setupUpdates } = require('./updater');
+const pkg = require('../package.json');
 
 const ROOT = path.join(__dirname, '..');
 const BUNDLED = path.join(ROOT, 'content');
@@ -19,7 +21,8 @@ const MIN = 60 * 1000;
 
 // Флаги для проверки: --now (перерыв сразу), --short (шаги по 6 с),
 // --nag=N (сразу долг N), --interval=M (минут между перерывами)
-const argv = process.argv.slice(1);
+// В установленной программе флаги проверки не работают.
+const argv = app.isPackaged ? [] : process.argv.slice(1);
 const hasFlag = (name) => argv.some((a) => a === '--' + name || a.startsWith('--' + name + '='));
 const flagValue = (name) => {
   const a = argv.find((x) => x.startsWith('--' + name + '='));
@@ -45,6 +48,8 @@ let awaySince = 0;           // когда компьютер заблокиро
 const lastFx = { eyes: 0, ghosts: 0 };
 let nagWin = null, nagReady = null, nagBusy = false, hazeOn = false, cursorTimer = null;
 let shootNow = null;         // отладка: сделать снимок окон прямо сейчас
+let update = null;           // { kind: 'ready' | 'available', version, url }
+let updater = { install() {} };
 
 // ---------------- журнал и состояние ----------------
 function log(msg) {
@@ -346,7 +351,14 @@ function refreshTray() {
   tray.setToolTip(`Гимнастика для глаз\n${status}\n${debtLine}`);
   const s = state.settings;
   const setInterval_ = (m) => () => { s.intervalMin = m; save(); if (!breakWin) schedule(intervalMs(), 'новый интервал'); };
+  const updateItems = !update ? [] : [
+    update.kind === 'ready'
+      ? { label: `Обновить до ${update.version}`, click: () => updater.install() }
+      : { label: `Скачать версию ${update.version}`, click: () => shell.openExternal(update.url) },
+    { type: 'separator' },
+  ];
   tray.setContextMenu(Menu.buildFromTemplate([
+    ...updateItems,
     { label: status, enabled: false },
     { label: debtLine, enabled: false },
     { type: 'separator' },
@@ -369,6 +381,7 @@ function refreshTray() {
       { label: 'Дымка вкл/выкл', click: () => setHaze(!hazeOn) },
       { label: 'Сбросить счётчик переносов', click: () => { rested('сброс вручную'); } },
     ] },
+    { label: 'О программе', click: showAbout },
     { label: 'Выход', click: () => { log('выход'); app.exit(0); } },
   ]));
 }
@@ -391,6 +404,30 @@ function startShots() {
   };
   shootNow = shoot;
   setInterval(shoot, 7000);
+}
+
+function showAbout() {
+  const author = pkg.author && !String(pkg.author).startsWith('__') ? String(pkg.author) : '';
+  const home = pkg.homepage && !pkg.homepage.includes('__') ? pkg.homepage : null;
+  const detail = [
+    author ? `Автор: ${author}` : '',
+    'Код — лицензия MIT.',
+    'Звуки поющих чаш — Викисклад, участник «דג בלי מלח», CC BY-SA 4.0.',
+    'Шрифт Golos Text — SIL Open Font License 1.1.',
+    '',
+    'Это не медицинское изделие. При боли, вспышках или резком ухудшении зрения — к офтальмологу.',
+  ].filter((s, i) => s || i > 0).join('\n');
+  dialog.showMessageBox({
+    type: 'none',
+    icon: nativeImage.createFromBitmap(eyeBGRA(128, irisFor(0)), { width: 128, height: 128 }),
+    title: 'О программе',
+    message: `Гимнастика для глаз ${app.getVersion()}`,
+    detail,
+    buttons: home ? ['Открыть страницу', 'Закрыть'] : ['Закрыть'],
+    defaultId: home ? 1 : 0,
+    cancelId: home ? 1 : 0,
+    noLink: true,
+  }).then(({ response }) => { if (home && response === 0) shell.openExternal(home); });
 }
 
 function plural(n, one, few, many) {
@@ -426,6 +463,18 @@ if (!app.requestSingleInstanceLock()) {
     setupIpc();
 
     tray = new Tray(trayIcon(state.debt));
+
+    updater = setupUpdates({
+      log,
+      onChange: (u) => {
+        update = u;
+        refreshTray();
+        if (tray && process.platform === 'win32') {
+          const content = u.kind === 'ready' ? `Скачана версия ${u.version}. Обновить можно в меню.` : `Вышла версия ${u.version}.`;
+          tray.displayBalloon({ title: 'Гимнастика для глаз', content });
+        }
+      },
+    });
     tray.on('click', () => tray.popUpContextMenu());
 
     for (const ev of ['lock-screen', 'suspend']) powerMonitor.on(ev, onAwayStart);

@@ -10,6 +10,7 @@ const { timeline } = require('../src/timeline');
 const { MouseTracker, nextWatching } = require('../src/mouse');
 const { captionGroup, pickCaption, snoozedLabel } = require('../src/captions');
 const { IRIS, irisFor, eyeRGBA, eyeBGRA } = require('../src/eyeIcon');
+const { parseVersion, isNewer } = require('../src/version');
 
 const root = path.join(__dirname, '..');
 let n = 0;
@@ -156,6 +157,26 @@ ok('глазик: прозрачные углы, тёмный зрачок, ра
   assert.deepStrictEqual(irisFor(0), IRIS.calm);
   assert.deepStrictEqual(irisFor(2), IRIS.warm);
   assert.deepStrictEqual(irisFor(7), IRIS.angry);
+});
+
+ok('версии: разбор и сравнение', () => {
+  assert.deepStrictEqual(parseVersion('v1.2.3'), [1, 2, 3]);
+  assert.strictEqual(parseVersion('мусор'), null);
+  assert.ok(isNewer('v1.0.1', '1.0.0'));
+  assert.ok(isNewer('1.10.0', '1.9.9'));
+  assert.ok(isNewer('2.0.0', '1.99.99'));
+  assert.ok(!isNewer('1.0.0', '1.0.0'));
+  assert.ok(!isNewer('0.9.9', '1.0.0'));
+  assert.ok(!isNewer('', '1.0.0'));
+});
+
+ok('package.json: версия, иконка, публикация в черновик', () => {
+  const pkg = require('../package.json');
+  assert.ok(parseVersion(pkg.version));
+  assert.strictEqual(pkg.build.win.icon, 'build/icon.png');
+  assert.strictEqual(pkg.build.publish.provider, 'github');
+  assert.strictEqual(pkg.build.publish.releaseType, 'draft');
+  assert.ok(pkg.dependencies['electron-updater']);
 });
 
 console.log(`\nвсе проверки пройдены: ${n}`);

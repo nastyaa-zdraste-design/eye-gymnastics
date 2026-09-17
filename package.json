@@ -1,10 +1,16 @@
 {
   "name": "eye-gymnastics",
   "productName": "Гимнастика для глаз",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "Напоминание делать гимнастику для глаз: раз в час, поверх всех окон, со звуком и анекдотом в конце.",
   "main": "src/main.js",
   "license": "MIT",
+  "author": "__OWNER__",
+  "homepage": "https://github.com/__OWNER__/__REPO__",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/__OWNER__/__REPO__.git"
+  },
   "scripts": {
     "start": "electron .",
     "check": "node scripts/check.js",
@@ -29,16 +35,33 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "build/icon.png"
+      "icon": "build/icon.png",
+      "artifactName": "Eye-Gymnastics-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": true,
       "perMachine": false
     },
     "mac": {
-      "target": "dmg",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
       "icon": "build/icon.png",
-      "category": "public.app-category.healthcare-fitness"
+      "category": "public.app-category.healthcare-fitness",
+      "identity": "-",
+      "artifactName": "Eye-Gymnastics-${version}-${arch}.${ext}"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "__OWNER__",
+      "repo": "__REPO__",
+      "releaseType": "draft"
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   }
 }
