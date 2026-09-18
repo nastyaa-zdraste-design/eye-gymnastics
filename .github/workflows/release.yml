@@ -32,13 +32,40 @@ jobs:
 
       - name: Сборка для Windows
         if: runner.os == 'Windows'
-        run: npx electron-builder --win --publish always
+        run: npx electron-builder --win --x64 --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Сборка для Mac (без подписи Apple)
         if: runner.os == 'macOS'
-        run: npx electron-builder --mac --publish always
+        run: npx electron-builder --mac --x64 --arm64 --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      # Список собранных файлов виден на странице запуска без входа в аккаунт.
+      - name: Что собралось
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "### Собранные файлы (${{ matrix.os }})"
+            echo
+            echo '```'
+            ls -lh dist 2>/dev/null | grep -v '^total' || echo "папки dist нет"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Тот же список отдельным файлом — его видно через открытый API.
+      - name: Сохранить список файлов
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p report
+          ls -l dist > "report/dist-${{ matrix.os }}.txt" 2>&1 || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: spisok-${{ matrix.os }}
+          path: report/
