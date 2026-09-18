@@ -55,6 +55,7 @@ jobs:
             dist/*.dmg
             dist/*.blockmap
             dist/*.yml
+            !dist/builder-debug.yml
 
   # Отдельное задание: иначе Windows и Mac создают по своему черновику
   # с одной и той же меткой, и файлы разъезжаются по двум релизам.
