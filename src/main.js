@@ -214,7 +214,9 @@ function ensureNag() {
       webPreferences: { preload: PRELOAD, backgroundThrottling: false },
     });
     // Прозрачно для мыши: эффекты никогда не мешают кликать и печатать.
-    nagWin.setIgnoreMouseEvents(true);
+    // forward — события мыши всё равно доходят до окна, поэтому оно узнаёт
+    // о курсоре сразу, а не через опрос, и успевает поймать клик.
+    nagWin.setIgnoreMouseEvents(true, { forward: true });
     nagWin.setAlwaysOnTop(true, 'screen-saver');
     nagWin.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     nagReady = new Promise((resolve) => nagWin.webContents.once('did-finish-load', resolve));
@@ -270,7 +272,7 @@ function hideNag() {
   nagBusy = false;
   stopCursor();
   if (nagWin && !nagWin.isDestroyed()) {
-    nagWin.setIgnoreMouseEvents(true);
+    nagWin.setIgnoreMouseEvents(true, { forward: true });
     nagWin.webContents.send('nag:reset');
     nagWin.hide();
   }
@@ -307,13 +309,15 @@ function setupIpc() {
     nagBusy = false;
     stopCursor();
     if (nagWin && !nagWin.isDestroyed()) {
-      nagWin.setIgnoreMouseEvents(true);
+      nagWin.setIgnoreMouseEvents(true, { forward: true });
       if (!hazeOn) nagWin.hide();
     }
   });
   // Курсор над глазами: окно ловит клик. Ушёл — снова прозрачно для мыши.
   ipcMain.on('nag:hover', (_e, over) => {
-    if (nagWin && !nagWin.isDestroyed()) nagWin.setIgnoreMouseEvents(!over);
+    if (!nagWin || nagWin.isDestroyed()) return;
+    nagWin.setIgnoreMouseEvents(!over, { forward: true });
+    log(over ? 'курсор на глазах — окно ловит клик' : 'курсор ушёл с глаз');
   });
   ipcMain.on('nag:click', () => startBreak('клик по глазам'));
   ipcMain.on('app:log', (_e, msg) => log('окно: ' + String(msg).slice(0, 300)));

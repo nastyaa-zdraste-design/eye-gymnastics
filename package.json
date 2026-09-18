@@ -1,7 +1,7 @@
 {
   "name": "eye-gymnastics",
   "productName": "Гимнастика для глаз",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Напоминание делать гимнастику для глаз: раз в час, поверх всех окон, со звуком и анекдотом в конце.",
   "main": "src/main.js",
   "license": "MIT",

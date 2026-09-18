@@ -22,11 +22,15 @@
   }
 
   // Курсор над глазами или облачком — окно начинает принимать клики.
+  // Запас вокруг: окно готово поймать клик ещё до того, как курсор доедет.
+  const PAD = 44;
+
   function updateHover() {
     let over = false;
     for (const el of clickable) {
       const r = el.getBoundingClientRect();
-      if (cursor.x >= r.left - 4 && cursor.x <= r.right + 4 && cursor.y >= r.top - 4 && cursor.y <= r.bottom + 4) {
+      if (cursor.x >= r.left - PAD && cursor.x <= r.right + PAD
+        && cursor.y >= r.top - PAD && cursor.y <= r.bottom + PAD) {
         over = true;
         break;
       }
@@ -34,11 +38,16 @@
     if (over !== hovering) { hovering = over; eg.nagHover(over); }
   }
 
-  eg.onCursor((p) => { cursor.x = p.x; cursor.y = p.y; updateHover(); });
+  const moved = (x, y) => { cursor.x = x; cursor.y = y; updateHover(); };
+
+  // Движения мыши доходят до окна, даже пока оно прозрачно для кликов, —
+  // так окно узнаёт о курсоре сразу. Опрос из программы остаётся запасным.
+  addEventListener('mousemove', (e) => moved(e.clientX, e.clientY), { passive: true });
+  eg.onCursor((p) => moved(p.x, p.y));
 
   function makeClickable(el) {
     clickable.add(el);
-    el.addEventListener('click', () => eg.nagClick());
+    el.addEventListener('mousedown', () => eg.nagClick());
   }
   function forget(el) {
     clickable.delete(el);
