@@ -45,6 +45,7 @@ let nextAt = 0;              // когда следующий перерыв (м
 const mouse = new MouseTracker();
 let watching = false;        // мышь давно не двигалась — смотрят фильм, перерыв и напоминания ждут
 let awaySince = 0;           // когда компьютер заблокировали или усыпили
+let quietUntil = 0;          // после пробуждения ничего не показываем
 const lastFx = { eyes: 0, ghosts: 0 };
 let nagWin = null, nagReady = null, nagBusy = false, hazeOn = false, cursorTimer = null;
 let shootNow = null;         // отладка: сделать снимок окон прямо сейчас
@@ -93,6 +94,7 @@ function snooze(why) {
 // а если время пришло — покажется, когда мышью снова начнут работать.
 function check() {
   if (breakWin) return;
+  if (Date.now() < quietUntil) return;   // тишина после пробуждения
   const now = Date.now();
   const was = watching;
   watching = nextWatching(watching, { stillMs: mouse.stillMs(now), activeSec: mouse.activeSec(now) },
@@ -107,10 +109,18 @@ function check() {
   updateNag(now);
 }
 
+const QUIET_AFTER_WAKE = 30 * 1000;
+
 function onAwayStart() { if (!awaySince) awaySince = Date.now(); }
 function onAwayEnd() {
   const gone = awaySince ? Date.now() - awaySince : 0;
   awaySince = 0;
+  // Сразу после пробуждения ничего не показываем: ни перерыв, ни глаза.
+  quietUntil = Date.now() + QUIET_AFTER_WAKE;
+  hideNag();
+  if (nextAt < quietUntil) nextAt = quietUntil;
+  log(`пробуждение (были вне ${Math.round(gone / 1000)} с) — тишина ${QUIET_AFTER_WAKE / 1000} с`);
+  refreshTray();
   if (gone < state.settings.stillMin * MIN) return;
   if (current) { current.rest = true; if (breakWin) breakWin.close(); }
   else { rested(`компьютер был заблокирован ${Math.round(gone / MIN)} мин`); schedule(intervalMs(), 'после отдыха'); }
