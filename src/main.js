@@ -3,6 +3,7 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, powerMonitor, shell, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const { loadContent, pickJoke } = require('./content');
 const { levelInfo, dueEffects } = require('./debt');
 const { loadState, saveState } = require('./state');
@@ -53,12 +54,23 @@ let update = null;           // { kind: 'ready' | 'available', version, url }
 let updater = { install() {} };
 
 // ---------------- журнал и состояние ----------------
+// Запасной журнал во временной папке: сюда попадает, почему не пишется основной.
+const TRACE = path.join(os.tmpdir(), 'eye-gymnastics-trace.txt');
+const stamp = () => new Date().toISOString().replace('T', ' ').slice(0, 19);
+let traceLeft = 50;
+function trace(msg) {
+  if (traceLeft-- <= 0) return;
+  try { fs.appendFileSync(TRACE, `${stamp()}  pid ${process.pid}  ${msg}\n`, 'utf8'); } catch (_) { /* некуда писать */ }
+}
+
 function log(msg) {
-  const line = new Date().toISOString().replace('T', ' ').slice(0, 19) + '  ' + msg + '\n';
-  try { fs.appendFileSync(logFile, line, 'utf8'); } catch (_) { /* журнал не критичен */ }
+  const line = stamp() + '  ' + msg + '\n';
+  try { fs.appendFileSync(logFile, line, 'utf8'); } catch (e) { trace(`журнал не пишется (${logFile}): ${e.message}`); }
   if (!app.isPackaged) process.stdout.write(line);
 }
-const save = () => saveState(stateFile, state);
+const save = () => {
+  if (!saveState(stateFile, state)) trace(`состояние не сохраняется (${stateFile})`);
+};
 const intervalMs = () => {
   const m = parseFloat(flagValue('interval'));
   return (m > 0 ? m : state.settings.intervalMin) * MIN;
@@ -92,10 +104,21 @@ function snooze(why) {
 // ---------------- главный цикл: раз в 5 секунд ----------------
 // Отсчёт часа идёт всегда. Пока смотрят фильм, перерыв не показывается,
 // а если время пришло — покажется, когда мышью снова начнут работать.
+let lastTick = Date.now();
 function check() {
-  if (breakWin) return;
-  if (Date.now() < quietUntil) return;   // тишина после пробуждения
   const now = Date.now();
+  // Цикл идёт раз в 5 секунд. Если между проверками прошло больше порога,
+  // компьютер спал, а событие о пробуждении могло не прийти.
+  const gap = now - lastTick;
+  lastTick = now;
+  if (gap >= state.settings.stillMin * MIN && !awaySince) {
+    log(`проверки не было ${Math.round(gap / MIN)} мин — компьютер спал`);
+    awaySince = now - gap;
+    onAwayEnd();
+  }
+  if (now - state.lastAlive >= MIN) { state.lastAlive = now; save(); }
+  if (breakWin) return;
+  if (now < quietUntil) return;          // тишина после пробуждения
   const was = watching;
   watching = nextWatching(watching, { stillMs: mouse.stillMs(now), activeSec: mouse.activeSec(now) },
     state.settings.stillMin * MIN);
@@ -471,7 +494,16 @@ if (!app.requestSingleInstanceLock()) {
     logFile = path.join(userDir, 'log.txt');
     try { if (fs.statSync(logFile).size > 300 * 1024) fs.renameSync(logFile, logFile + '.old'); } catch (_) { /* нет журнала */ }
     state = loadState(stateFile);
+    trace(`запуск ${app.getVersion()}, данные: ${userDir}, папка: ${process.cwd()}`);
     log(`запуск ${app.getVersion()}, ${process.platform}, данные: ${userDir}`);
+    // Программа долго не работала — компьютер был выключен. Это тоже отдых.
+    const off = state.lastAlive ? Date.now() - state.lastAlive : 0;
+    if (off >= state.settings.stillMin * MIN && state.debt) {
+      state.debt = 0;
+      log(`программа не работала ${Math.round(off / MIN)} мин — отдых засчитан, переносы сброшены`);
+    }
+    state.lastAlive = Date.now();
+    save();
 
     if (process.platform === 'darwin' && app.dock) app.dock.hide();
     setupIpc();
