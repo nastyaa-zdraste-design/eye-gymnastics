@@ -10,6 +10,7 @@ const { loadState, saveState } = require('./state');
 const { MouseTracker, nextWatching } = require('./mouse');
 const { pickCaption, snoozedLabel } = require('./captions');
 const { irisFor, eyeBGRA } = require('./eyeIcon');
+const { humanDur } = require('./duration');
 const { setupUpdates } = require('./updater');
 const pkg = require('../package.json');
 
@@ -149,6 +150,13 @@ function onAwayEnd() {
   else { rested(`компьютер был заблокирован ${Math.round(gone / MIN)} мин`); schedule(intervalMs(), 'после отдыха'); }
 }
 
+// «Без отдыха 3 ч 20 мин» — время с последней доделанной зарядки.
+// Пока меньше минуты, строки нет.
+function restLine() {
+  const ms = state.lastRest ? Date.now() - state.lastRest : 0;
+  return ms >= MIN ? `Без отдыха ${humanDur(ms)}` : '';
+}
+
 // ---------------- окно перерыва ----------------
 function startBreak(reason) {
   if (breakWin) { breakWin.moveTop(); breakWin.focus(); return; }
@@ -169,6 +177,7 @@ function startBreak(reason) {
       debt: state.debt,
       caption,
       snoozedLabel: state.debt > 0 ? snoozedLabel(state.debt) : '',
+      restLabel: restLine(),
       next: levelInfo(state.debt + 1),
       sound: state.settings.sound,
       volume: state.settings.volume,
@@ -321,6 +330,7 @@ function setupIpc() {
     if (!current || current.finished) return;
     current.finished = true;
     state.debt = 0;
+    state.lastRest = Date.now();
     state.jokesUsed = current.used;
     state.stats.done++;
     save();
@@ -384,8 +394,9 @@ function refreshTray() {
     : watching ? 'Мышь не двигается — перерыв подождёт'
     : `Перерыв через ${mins} мин`;
   const debtLine = state.debt ? `Отложено ${state.debt} ${plural(state.debt, 'раз', 'раза', 'раз')} подряд` : 'Без переносов';
+  const rest = restLine();
   tray.setImage(trayIcon(state.debt));
-  tray.setToolTip(`Гимнастика для глаз\n${status}\n${debtLine}`);
+  tray.setToolTip(`Гимнастика для глаз\n${status}\n${debtLine}${rest ? '\n' + rest : ''}`);
   const s = state.settings;
   const setInterval_ = (m) => () => { s.intervalMin = m; save(); if (!breakWin) schedule(intervalMs(), 'новый интервал'); };
   const updateItems = !update ? [] : [
@@ -398,6 +409,7 @@ function refreshTray() {
     ...updateItems,
     { label: status, enabled: false },
     { label: debtLine, enabled: false },
+    ...(rest ? [{ label: rest, enabled: false }] : []),
     { type: 'separator' },
     { label: 'Сделать перерыв сейчас', click: () => startBreak('из трея') },
     { label: `Отложить на ${levelInfo(state.debt + 1).snoozeMin} мин`, enabled: !breakWin, click: () => snooze('из трея') },
@@ -503,6 +515,7 @@ if (!app.requestSingleInstanceLock()) {
       log(`программа не работала ${Math.round(off / MIN)} мин — отдых засчитан, переносы сброшены`);
     }
     state.lastAlive = Date.now();
+    if (!state.lastRest) state.lastRest = Date.now();
     save();
 
     if (process.platform === 'darwin' && app.dock) app.dock.hide();

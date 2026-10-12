@@ -11,6 +11,7 @@ const { MouseTracker, nextWatching } = require('../src/mouse');
 const { captionGroup, pickCaption, snoozedLabel } = require('../src/captions');
 const { IRIS, irisFor, eyeRGBA, eyeBGRA } = require('../src/eyeIcon');
 const { parseVersion, isNewer } = require('../src/version');
+const { humanDur } = require('../src/duration');
 
 const root = path.join(__dirname, '..');
 let n = 0;
@@ -168,6 +169,14 @@ ok('версии: разбор и сравнение', () => {
   assert.ok(!isNewer('1.0.0', '1.0.0'));
   assert.ok(!isNewer('0.9.9', '1.0.0'));
   assert.ok(!isNewer('', '1.0.0'));
+});
+
+ok('длительность словами: минуты, часы, часы с минутами', () => {
+  assert.strictEqual(humanDur(45 * 60e3), '45 мин');
+  assert.strictEqual(humanDur(60 * 60e3), '1 ч');
+  assert.strictEqual(humanDur(200 * 60e3), '3 ч 20 мин');
+  assert.strictEqual(humanDur(59e3), '0 мин');
+  assert.strictEqual(humanDur(-5), '0 мин');
 });
 
 ok('package.json: версия, иконка, публикация в черновик', () => {

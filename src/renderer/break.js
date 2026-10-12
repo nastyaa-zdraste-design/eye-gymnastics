@@ -135,9 +135,10 @@
   // ---------------- кнопки ----------------
   const next = D.next || { snoozeMin: 20, holdToSnooze: false };
   const HOLD_MS = 2000;
-  bSnooze.querySelector('.lbl').textContent = next.holdToSnooze
+  bSnooze.querySelector('.l1').textContent = next.holdToSnooze
     ? `Удерживай, чтобы отложить на ${next.snoozeMin} мин`
     : `Отложить на ${next.snoozeMin} мин`;
+  bSnooze.querySelector('.l2').textContent = D.restLabel || '';
 
   if (hasIntro) {
     $('snoozed').textContent = D.snoozedLabel || '';
