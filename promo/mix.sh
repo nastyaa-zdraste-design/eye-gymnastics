@@ -3,8 +3,8 @@
 set -u
 NAME="$1"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-FF="/c/Users/nasty/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-9.0.2-full_build/bin/ffmpeg.exe"
-REC="/c/Users/nasty/AppData/Roaming/Гимнастика для глаз/rec"
+FF="${FFMPEG:-$(cygpath -u "$LOCALAPPDATA")/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-9.0.2-full_build/bin/ffmpeg.exe}"
+REC="$(cygpath -u "$APPDATA")/Гимнастика для глаз/rec"
 OUT="$ROOT/promo/out"
 
 N=$(ls "$REC" | wc -l)

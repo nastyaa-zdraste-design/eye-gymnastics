@@ -1,6 +1,6 @@
 'use strict';
 // Гимнастика для глаз — основной процесс: трей, расписание, окна.
-const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, powerMonitor, shell, dialog } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, powerMonitor, shell, dialog, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -53,6 +53,19 @@ let nagWin = null, nagReady = null, nagBusy = false, hazeOn = false, cursorTimer
 let shootNow = null;         // отладка: сделать снимок окон прямо сейчас
 let update = null;           // { kind: 'ready' | 'available', version, url }
 let updater = { install() {} };
+
+// ---------------- безопасность ----------------
+// Наружу открываем только ссылки на GitHub по https.
+const safeUrl = (u) => typeof u === 'string' && /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+(\/[\w./%-]*)?$/.test(u);
+const openExternalSafe = (u) => { if (safeUrl(u)) shell.openExternal(u); };
+
+// Окна показывают только свои файлы: новые окна и переходы по ссылкам запрещены,
+// разрешения (камера, микрофон, геолокация и т. п.) никому не выдаются.
+app.on('web-contents-created', (_e, contents) => {
+  contents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  contents.on('will-navigate', (e) => e.preventDefault());
+  contents.on('will-attach-webview', (e) => e.preventDefault());
+});
 
 // ---------------- журнал и состояние ----------------
 // Запасной журнал во временной папке: сюда попадает, почему не пишется основной.
@@ -191,7 +204,7 @@ function startBreak(reason) {
     frame: false, show: false, alwaysOnTop: true, skipTaskbar: true,
     resizable: false, movable: false, minimizable: false, maximizable: false, fullscreenable: false,
     backgroundColor: '#667A61', title: 'Гимнастика для глаз',
-    webPreferences: { preload: PRELOAD, backgroundThrottling: false },
+    webPreferences: { preload: PRELOAD, backgroundThrottling: false, sandbox: true, contextIsolation: true, nodeIntegration: false },
   });
   breakWin.setAlwaysOnTop(true, 'screen-saver');
   breakWin.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
@@ -243,7 +256,7 @@ function ensureNag() {
       ...d.bounds,
       transparent: true, backgroundColor: '#00000000', frame: false, focusable: false,
       alwaysOnTop: true, skipTaskbar: true, resizable: false, movable: false, hasShadow: false, show: false,
-      webPreferences: { preload: PRELOAD, backgroundThrottling: false },
+      webPreferences: { preload: PRELOAD, backgroundThrottling: false, sandbox: true, contextIsolation: true, nodeIntegration: false },
     });
     // Прозрачно для мыши: эффекты никогда не мешают кликать и печатать.
     // forward — события мыши всё равно доходят до окна, поэтому оно узнаёт
@@ -404,7 +417,7 @@ function refreshTray() {
   const updateItems = !update ? [] : [
     update.kind === 'ready'
       ? { label: `Обновить до ${update.version}`, click: () => updater.install() }
-      : { label: `Скачать версию ${update.version}`, click: () => shell.openExternal(update.url) },
+      : { label: `Скачать версию ${update.version}`, click: () => openExternalSafe(update.url) },
     { type: 'separator' },
   ];
   tray.setContextMenu(Menu.buildFromTemplate([
@@ -501,7 +514,7 @@ function showAbout() {
     defaultId: home ? 1 : 0,
     cancelId: home ? 1 : 0,
     noLink: true,
-  }).then(({ response }) => { if (home && response === 0) shell.openExternal(home); });
+  }).then(({ response }) => { if (home && response === 0) openExternalSafe(home); });
 }
 
 function plural(n, one, few, many) {
@@ -525,6 +538,7 @@ if (!app.requestSingleInstanceLock()) {
   app.on('window-all-closed', () => { /* живём в трее */ });
 
   app.whenReady().then(() => {
+    session.defaultSession.setPermissionRequestHandler((_wc, _perm, cb) => cb(false));
     userDir = app.getPath('userData');
     fs.mkdirSync(userDir, { recursive: true });
     stateFile = path.join(userDir, 'state.json');
