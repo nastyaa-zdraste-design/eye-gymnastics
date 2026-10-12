@@ -280,7 +280,9 @@ async function playNag(kind, info) {
   w.moveTop();
   startCursor();
   // --edge=left|right|top|bottom — только для проверки: с какого края выглянут глаза
-  w.webContents.send('nag:play', { kind, level: info.level, sleepy: info.sleepy, edge: flagValue('edge') });
+  w.webContents.send('nag:play', {
+    kind, level: info.level, sleepy: info.sleepy, edge: flagValue('edge'), demo: hasFlag('demo'),
+  });
   log(`донимание: ${kind}, уровень ${info.level}`);
 }
 
@@ -455,6 +457,29 @@ function startShots() {
   setInterval(shoot, 7000);
 }
 
+// --rec=СЕК — кадры окна по 15 в секунду, для записи роликов.
+// Окно донимания прозрачное, и запись экрана его не видит: снимаем изнутри.
+function startRec(sec) {
+  const dir = path.join(userDir, 'rec');
+  try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) { /* первой записи нет */ }
+  fs.mkdirSync(dir, { recursive: true });
+  const until = Date.now() + sec * 1000;
+  let n = 0;
+  const shoot = async () => {
+    if (Date.now() > until) { log(`запись: ${n} кадров в ${dir}`); return; }
+    const w = breakWin && !breakWin.isDestroyed() && breakWin.isVisible() ? breakWin
+      : nagWin && !nagWin.isDestroyed() && nagWin.isVisible() ? nagWin : null;
+    if (w) {
+      try {
+        const img = await w.webContents.capturePage();
+        fs.writeFileSync(path.join(dir, `f${String(++n).padStart(4, '0')}.png`), img.toPNG());
+      } catch (e) { log('кадр не вышел: ' + e.message); }
+    }
+    setTimeout(shoot, 5);
+  };
+  shoot();
+}
+
 function showAbout() {
   const author = pkg.author && !String(pkg.author).startsWith('__') ? String(pkg.author) : '';
   const home = pkg.homepage && !pkg.homepage.includes('__') ? pkg.homepage : null;
@@ -550,7 +575,14 @@ if (!app.requestSingleInstanceLock()) {
     const nag = parseInt(flagValue('nag'), 10);
     if (nag >= 0) { state.debt = nag; save(); lastFx.eyes = 0; lastFx.ghosts = 0; }
 
+    // --fx=eyes|ghosts|haze — показать один эффект сразу, для записи роликов
+    const fx = flagValue('fx');
+    if (fx === 'haze') setHaze(true);
+    else if (fx === 'eyes' || fx === 'ghosts') playNag(fx, levelInfo(nag >= 0 ? nag : 4));
+
     if (hasFlag('shots') && !app.isPackaged) startShots();
+    const rec = parseInt(flagValue('rec'), 10);
+    if (rec > 0 && !app.isPackaged) setTimeout(() => startRec(rec), 300);
 
     schedule(hasFlag('now') ? 1500 : intervalMs(), 'старт');
     setInterval(() => mouse.sample(screen.getCursorScreenPoint(), Date.now()), 1000);

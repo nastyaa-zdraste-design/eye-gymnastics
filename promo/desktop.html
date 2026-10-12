@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>рабочий экран</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font: 15px/1.55 'Segoe UI', -apple-system, system-ui, sans-serif;
+    color: #2B3038; background: #E9EBEF; display: flex; overflow: hidden;
+  }
+
+  aside { width: 248px; background: #F6F7F9; border-right: 1px solid #DFE2E8; padding: 18px 14px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 600; margin-bottom: 18px; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; background: #8FA37F; }
+  .nav div { padding: 8px 10px; border-radius: 8px; color: #5A6270; }
+  .nav div.on { background: #E6EAF1; color: #2B3038; font-weight: 500; }
+  .tag { margin-top: 22px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #9AA2B0; padding: 0 10px 8px; }
+
+  main { flex: 1; display: flex; flex-direction: column; }
+  header {
+    height: 52px; background: #FFFFFF; border-bottom: 1px solid #DFE2E8;
+    display: flex; align-items: center; gap: 14px; padding: 0 22px;
+  }
+  header .crumbs { color: #7A8291; }
+  header .crumbs b { color: #2B3038; font-weight: 600; }
+  header .spacer { flex: 1; }
+  .pill { padding: 6px 14px; border-radius: 999px; background: #EEF1F6; color: #5A6270; font-size: 13px; }
+  .pill.go { background: #3F5B8B; color: #fff; }
+
+  .sheet {
+    flex: 1; margin: 26px 34px; background: #FFFFFF; border: 1px solid #DFE2E8; border-radius: 12px;
+    padding: 38px 54px; overflow: hidden; box-shadow: 0 1px 2px rgba(20,28,45,.05);
+  }
+  h1 { font-size: 27px; line-height: 1.25; margin-bottom: 6px; }
+  .meta { color: #8A92A0; font-size: 13px; margin-bottom: 22px; }
+  h2 { font-size: 17px; margin: 20px 0 8px; }
+  p { margin-bottom: 10px; max-width: 760px; color: #39404C; }
+  ul { margin: 0 0 12px 20px; color: #39404C; }
+  li { margin-bottom: 5px; }
+  table { border-collapse: collapse; width: 100%; max-width: 760px; margin-top: 6px; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #E7EAF0; }
+  th { color: #8A92A0; font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .ok { color: #4E7A4C; }
+  .wait { color: #9A7B3C; }
+</style>
+</head>
+<body>
+  <aside>
+    <div class="brand"><span class="dot"></span> Рабочий день</div>
+    <div class="nav">
+      <div class="on">Задачи</div>
+      <div>Календарь</div>
+      <div>Документы</div>
+      <div>Заметки</div>
+    </div>
+    <div class="tag">Проекты</div>
+    <div class="nav">
+      <div>Сайт студии</div>
+      <div>Каталог</div>
+      <div>Презентация</div>
+    </div>
+  </aside>
+
+  <main>
+    <header>
+      <span class="crumbs">Документы / <b>План на неделю</b></span>
+      <span class="spacer"></span>
+      <span class="pill">Черновик</span>
+      <span class="pill go">Поделиться</span>
+    </header>
+
+    <section class="sheet">
+      <h1>План на неделю</h1>
+      <div class="meta">Обновлён сегодня · 4 участника</div>
+
+      <p>Собрали задачи по трём проектам. Главное на неделе — финальная вёрстка
+      каталога и правки по сайту студии после созвона.</p>
+
+      <h2>Что делаем</h2>
+      <ul>
+        <li>Каталог: собрать сетку карточек, отдать в вёрстку</li>
+        <li>Сайт студии: правки по главной, блок с отзывами</li>
+        <li>Презентация: обновить цифры за квартал</li>
+      </ul>
+
+      <h2>Сроки</h2>
+      <table>
+        <tr><th>Задача</th><th>Кто</th><th>Срок</th><th>Статус</th></tr>
+        <tr><td>Сетка карточек</td><td>Дизайн</td><td>Вторник</td><td class="ok">В работе</td></tr>
+        <tr><td>Блок с отзывами</td><td>Дизайн</td><td>Среда</td><td class="wait">Ждёт текст</td></tr>
+        <tr><td>Цифры за квартал</td><td>Аналитика</td><td>Четверг</td><td class="ok">В работе</td></tr>
+        <tr><td>Вёрстка каталога</td><td>Разработка</td><td>Пятница</td><td class="wait">Не начата</td></tr>
+      </table>
+
+      <h2>Вопросы</h2>
+      <p>Нужны финальные фото для карточек и решение по шрифту заголовков.</p>
+    </section>
+  </main>
+</body>
+</html>

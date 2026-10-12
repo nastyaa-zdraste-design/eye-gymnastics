@@ -3,3 +3,5 @@ dist/
 *.log
 archive/
 design/gimnastika-dlya-glaz*.html
+promo/out/
+promo/raw/

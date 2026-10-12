@@ -231,7 +231,23 @@
   }
 
   // ---------------- связь ----------------
+  // В режиме записи роликов рисуем и сам курсор: снимок окна его не содержит.
+  function showDemoCursor() {
+    if (document.querySelector('.ghost.me')) return;
+    const img = document.createElement('img');
+    img.src = ARROW;
+    img.className = 'ghost me show';
+    img.style.setProperty('--o', '1');
+    document.body.appendChild(img);
+    const follow = () => {
+      img.style.transform = `translate(${cursor.x}px, ${cursor.y}px)`;
+      requestAnimationFrame(follow);
+    };
+    follow();
+  }
+
   eg.onNag((d) => {
+    if (d.demo) showDemoCursor();
     if (d.kind === 'eyes') playEyes(!!d.sleepy, d.edge);
     else if (d.kind === 'ghosts') playGhosts(d.level || 4);
   });
