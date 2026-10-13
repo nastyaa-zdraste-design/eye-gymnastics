@@ -97,13 +97,14 @@ function schedule(ms, why) {
 }
 
 function rested(why) {
-  if (state.debt) { state.debt = 0; save(); }
+  if (state.debt || state.snoozeSince) { state.debt = 0; state.snoozeSince = 0; save(); }
   hideNag();
   log('отдых засчитан: ' + why);
   refreshTray();
 }
 
 function snooze(why) {
+  if (!state.debt) state.snoozeSince = Date.now();
   state.debt = Math.min(state.debt + 1, 99);
   state.stats.snoozed++;
   save();
@@ -163,10 +164,11 @@ function onAwayEnd() {
   else { rested(`компьютер был заблокирован ${Math.round(gone / MIN)} мин`); schedule(intervalMs(), 'после отдыха'); }
 }
 
-// «Без отдыха 3 ч 20 мин» — время с последней доделанной зарядки.
-// Пока меньше минуты, строки нет.
+// «Без отдыха 1 ч 15 мин» — время с первого переноса подряд.
+// Без переносов строки нет: отдыхать ещё не отказывались.
 function restLine() {
-  const ms = state.lastRest ? Date.now() - state.lastRest : 0;
+  if (!state.debt || !state.snoozeSince) return '';
+  const ms = Date.now() - state.snoozeSince;
   return ms >= MIN ? `Без отдыха ${humanDur(ms)}` : '';
 }
 
@@ -345,7 +347,7 @@ function setupIpc() {
     if (!current || current.finished) return;
     current.finished = true;
     state.debt = 0;
-    state.lastRest = Date.now();
+    state.snoozeSince = 0;
     state.jokesUsed = current.used;
     state.stats.done++;
     save();
@@ -551,10 +553,10 @@ if (!app.requestSingleInstanceLock()) {
     const off = state.lastAlive ? Date.now() - state.lastAlive : 0;
     if (off >= state.settings.stillMin * MIN && state.debt) {
       state.debt = 0;
+      state.snoozeSince = 0;
       log(`программа не работала ${Math.round(off / MIN)} мин — отдых засчитан, переносы сброшены`);
     }
     state.lastAlive = Date.now();
-    if (!state.lastRest) state.lastRest = Date.now();
     save();
 
     if (process.platform === 'darwin' && app.dock) app.dock.hide();
